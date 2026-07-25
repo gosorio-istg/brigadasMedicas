@@ -1,0 +1,1336 @@
+{
+  "info": {
+    "name": "BrigadaSalud API",
+    "description": "Colección de pruebas para la API BrigadaSalud: Auth, Preferencias, Usuarios, Roles, Permisos, Brigadas, Especialidades, Médicos, Brigadistas, Pacientes, Turnos, Reportes, Comunidades, Noticias y Solicitudes de Brigada (endpoint público). Incluye una carpeta de casos de error para verificar los mensajes claros de la API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "1", "type": "string" },
+    { "key": "role_id", "value": "1", "type": "string" },
+    { "key": "permission_id", "value": "1", "type": "string" },
+    { "key": "brigada_id", "value": "1", "type": "string" },
+    { "key": "especialidad_id", "value": "1", "type": "string" },
+    { "key": "paciente_id", "value": "1", "type": "string" },
+    { "key": "turno_id", "value": "1", "type": "string" },
+    { "key": "medico_id", "value": "1", "type": "string" },
+    { "key": "brigadista_user_id", "value": "2", "type": "string" },
+    { "key": "comunidad_id", "value": "1", "type": "string" },
+    { "key": "noticia_id", "value": "1", "type": "string" },
+    { "key": "solicitud_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"coordinador@brigadasalud.test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "    console.log('Token guardado:', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Login como Administrador (no reemplaza {{token}})",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"administrador@brigadasalud.test\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/me",
+              "host": ["{{base_url}}"],
+              "path": ["me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Preferencias",
+      "item": [
+        {
+          "name": "Ver mis preferencias",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/preferencias",
+              "host": ["{{base_url}}"],
+              "path": ["preferencias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar mis preferencias",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notificaciones_push\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/preferencias",
+              "host": ["{{base_url}}"],
+              "path": ["preferencias"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver usuario",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@brigadasalud.test\",\n  \"password\": \"password123\",\n  \"roles\": [\"Brigadista\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario actualizado\",\n  \"activo\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver rol",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "{{role_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear rol",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Rol\",\n  \"permissions\": [\"reportes.ver\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar rol",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rol actualizado\",\n  \"permissions\": [\"reportes.ver\", \"usuarios.ver\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "{{role_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar rol",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/roles/{{role_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "{{role_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Permisos",
+      "item": [
+        {
+          "name": "Listar permisos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["permissions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear permiso",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"nuevo.permiso\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["permissions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar permiso",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/permissions/{{permission_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["permissions", "{{permission_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Brigadas",
+      "item": [
+        {
+          "name": "Listar brigadas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver brigada",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear brigada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Brigada Sector Norte\",\n  \"fecha\": \"2026-08-15\",\n  \"ubicacion\": \"Sector Norte\",\n  \"especialidades\": [\n    { \"id\": {{especialidad_id}}, \"cupos\": 20 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/brigadas",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('brigada_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Actualizar brigada",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_curso\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar brigada",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar especialidades",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/especialidades",
+              "host": ["{{base_url}}"],
+              "path": ["especialidades"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear especialidad",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Medicina General\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/especialidades",
+              "host": ["{{base_url}}"],
+              "path": ["especialidades"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('especialidad_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Eliminar especialidad",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/especialidades/{{especialidad_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["especialidades", "{{especialidad_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver médicos asignados a la brigada",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/medicos",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "medicos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Asignar médicos a la brigada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"medicos\": [{{medico_id}}]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/medicos",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "medicos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver equipo de brigadistas de la brigada",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/brigadistas",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "brigadistas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Asignar brigadista a la brigada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": {{brigadista_user_id}},\n  \"rol_equipo\": \"registro\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/brigadistas",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "brigadistas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar asistencia de brigadista",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asistio\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/brigadistas/{{brigadista_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "brigadistas", "{{brigadista_user_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Quitar brigadista de la brigada",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/brigadas/{{brigada_id}}/brigadistas/{{brigadista_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["brigadas", "{{brigada_id}}", "brigadistas", "{{brigadista_user_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Médicos",
+      "item": [
+        {
+          "name": "Listar médicos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/medicos",
+              "host": ["{{base_url}}"],
+              "path": ["medicos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver médico",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/medicos/{{medico_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["medicos", "{{medico_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear médico",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Dra. Nueva Doctora\",\n  \"credencial_cmp\": \"CMP-9001\",\n  \"especialidad_id\": {{especialidad_id}},\n  \"telefono\": \"0991112233\",\n  \"disponible\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medicos",
+              "host": ["{{base_url}}"],
+              "path": ["medicos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('medico_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Actualizar médico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disponible\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medicos/{{medico_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["medicos", "{{medico_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar médico",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/medicos/{{medico_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["medicos", "{{medico_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pacientes",
+      "item": [
+        {
+          "name": "Buscar pacientes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pacientes?buscar=",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes"],
+              "query": [{ "key": "buscar", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cedula\": \"0912345678\",\n  \"nombres\": \"Maria\",\n  \"apellidos\": \"Lopez\",\n  \"fecha_nacimiento\": \"1990-05-10\",\n  \"sexo\": \"femenino\",\n  \"telefono\": \"0991234567\",\n  \"sector\": \"Sector 1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('paciente_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ver paciente (con historial de turnos)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pacientes/{{paciente_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes", "{{paciente_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar paciente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"0987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pacientes/{{paciente_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes", "{{paciente_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Turnos",
+      "item": [
+        {
+          "name": "Registrar turno (paciente existente)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brigada_id\": {{brigada_id}},\n  \"especialidad_id\": {{especialidad_id}},\n  \"paciente_id\": {{paciente_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": ["{{base_url}}"],
+              "path": ["turnos"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('turno_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Registrar turno (registro asistido, paciente nuevo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brigada_id\": {{brigada_id}},\n  \"especialidad_id\": {{especialidad_id}},\n  \"paciente\": {\n    \"cedula\": \"0923456789\",\n    \"nombres\": \"Juan\",\n    \"apellidos\": \"Perez\",\n    \"fecha_nacimiento\": \"1985-02-20\",\n    \"sexo\": \"masculino\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/turnos",
+              "host": ["{{base_url}}"],
+              "path": ["turnos"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar / filtrar turnos (cola de espera)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/turnos?brigada_id={{brigada_id}}&especialidad_id={{especialidad_id}}&estado=pendiente",
+              "host": ["{{base_url}}"],
+              "path": ["turnos"],
+              "query": [
+                { "key": "brigada_id", "value": "{{brigada_id}}" },
+                { "key": "especialidad_id", "value": "{{especialidad_id}}" },
+                { "key": "estado", "value": "pendiente" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar estado de turno (con médico asignado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"atendido\",\n  \"medico_id\": {{medico_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/turnos/{{turno_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["turnos", "{{turno_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reportes",
+      "item": [
+        {
+          "name": "Resumen general",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/reportes/resumen",
+              "host": ["{{base_url}}"],
+              "path": ["reportes", "resumen"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resumen filtrado por brigada",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/reportes/resumen?brigada_id={{brigada_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["reportes", "resumen"],
+              "query": [{ "key": "brigada_id", "value": "{{brigada_id}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Por sector",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/reportes/por-sector",
+              "host": ["{{base_url}}"],
+              "path": ["reportes", "por-sector"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comunidades",
+      "item": [
+        {
+          "name": "Listar comunidades",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/comunidades",
+              "host": ["{{base_url}}"],
+              "path": ["comunidades"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver comunidad",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/comunidades/{{comunidad_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comunidades", "{{comunidad_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear comunidad",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sergio Toral\",\n  \"sector\": \"Sergio Toral\",\n  \"referencia_ubicacion\": \"Cerca del subcentro de salud\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/comunidades",
+              "host": ["{{base_url}}"],
+              "path": ["comunidades"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('comunidad_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Actualizar comunidad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referencia_ubicacion\": \"Junto al parque central\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/comunidades/{{comunidad_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comunidades", "{{comunidad_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar comunidad",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/comunidades/{{comunidad_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comunidades", "{{comunidad_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Noticias",
+      "item": [
+        {
+          "name": "Listar noticias",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/noticias",
+              "host": ["{{base_url}}"],
+              "path": ["noticias"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver noticia",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/noticias/{{noticia_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["noticias", "{{noticia_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear noticia",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Nueva jornada médica programada\",\n  \"resumen\": \"Atención gratuita para toda la comunidad.\",\n  \"contenido\": \"Detalle completo de la próxima jornada médica, especialidades disponibles y horarios de atención.\",\n  \"fecha_publicacion\": \"2026-08-10\",\n  \"publicada\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/noticias",
+              "host": ["{{base_url}}"],
+              "path": ["noticias"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('noticia_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Publicar noticia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publicada\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/noticias/{{noticia_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["noticias", "{{noticia_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar noticia",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/noticias/{{noticia_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["noticias", "{{noticia_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Solicitudes de Brigada",
+      "item": [
+        {
+          "name": "Solicitar brigada (público, sin token)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_solicitante\": \"Rosa Elena Vera\",\n  \"telefono_contacto\": \"0991234567\",\n  \"sector\": \"Prosperina\",\n  \"especialidades_solicitadas\": \"Medicina General, Odontología\",\n  \"motivo\": \"La comunidad no ha recibido atención médica en más de un año.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes-brigada",
+              "host": ["{{base_url}}"],
+              "path": ["solicitudes-brigada"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('solicitud_id', data.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Listar solicitudes (Coordinador)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/solicitudes-brigada?estado=pendiente",
+              "host": ["{{base_url}}"],
+              "path": ["solicitudes-brigada"],
+              "query": [{ "key": "estado", "value": "pendiente" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Aprobar solicitud",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"aprobada\",\n  \"notas_coordinador\": \"Se coordinará con el equipo médico disponible.\",\n  \"brigada_id\": {{brigada_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/solicitudes-brigada/{{solicitud_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["solicitudes-brigada", "{{solicitud_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Casos de error (mensajes claros)",
+      "item": [
+        {
+          "name": "401 - Sin token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "401 - Token inválido",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "token-invalido", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "422 - Login con credenciales incorrectas",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"coordinador@brigadasalud.test\",\n  \"password\": \"claveIncorrecta\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "404 - Recurso inexistente (paciente)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/pacientes/999999",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes", "999999"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "404 - Ruta inexistente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/ruta-que-no-existe",
+              "host": ["{{base_url}}"],
+              "path": ["ruta-que-no-existe"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "422 - Validación (campos requeridos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pacientes",
+              "host": ["{{base_url}}"],
+              "path": ["pacientes"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
