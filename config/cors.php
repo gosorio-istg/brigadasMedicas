@@ -27,7 +27,9 @@ return [
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    // El navegador cachea la respuesta del preflight (OPTIONS) por este tiempo (segundos)
+    // en vez de repetirlo antes de cada request. No afecta a Android (CORS es solo de navegador).
+    'max_age' => 3600,
 
     'supports_credentials' => false,
 
