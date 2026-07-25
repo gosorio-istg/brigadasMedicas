@@ -13,6 +13,8 @@ Homestead.json
 Homestead.yaml
 auth.json
 npm-debug.log
+base_BrigadasMedicas.sql
+README.md
 yarn-error.log
 /.fleet
 /.idea
