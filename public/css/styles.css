@@ -1213,6 +1213,8 @@ select.form-control {
   padding: var(--space-lg);
   max-width: 440px;
   width: 100%;
+  max-height: calc(100vh - var(--space-md) * 2);
+  overflow-y: auto;
   box-shadow: var(--shadow-lg);
   animation: scaleIn 0.3s ease;
 }
