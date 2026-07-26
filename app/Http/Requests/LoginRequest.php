@@ -14,7 +14,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            // Acepta correo electrónico o cédula ecuatoriana como identificador de acceso.
+            'login' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }

@@ -50,17 +50,17 @@ class DemoDataSeeder extends Seeder
     private function sembrarUsuarios(): array
     {
         $datos = [
-            ['email' => 'coordinador2@brigadasalud.test', 'name' => 'Roberto Iván Salazar', 'rol' => 'Coordinador'],
-            ['email' => 'brigadista1@brigadasalud.test', 'name' => 'María Fernanda Ochoa', 'rol' => 'Brigadista'],
-            ['email' => 'brigadista2@brigadasalud.test', 'name' => 'Carlos Andrés Zambrano', 'rol' => 'Brigadista'],
-            ['email' => 'brigadista3@brigadasalud.test', 'name' => 'Lucía Paola Mendoza', 'rol' => 'Brigadista'],
+            ['email' => 'coordinador2@brigadasalud.test', 'name' => 'Roberto Iván Salazar', 'cedula' => '0101010106', 'rol' => 'Coordinador'],
+            ['email' => 'brigadista1@brigadasalud.test', 'name' => 'María Fernanda Ochoa', 'cedula' => '2424242424', 'rol' => 'Brigadista'],
+            ['email' => 'brigadista2@brigadasalud.test', 'name' => 'Carlos Andrés Zambrano', 'cedula' => '1313131318', 'rol' => 'Brigadista'],
+            ['email' => 'brigadista3@brigadasalud.test', 'name' => 'Lucía Paola Mendoza', 'cedula' => '0808080808', 'rol' => 'Brigadista'],
         ];
 
         $usuarios = [];
         foreach ($datos as $dato) {
             $usuario = User::firstOrCreate(
                 ['email' => $dato['email']],
-                ['name' => $dato['name'], 'password' => Hash::make('password123'), 'activo' => true]
+                ['name' => $dato['name'], 'cedula' => $dato['cedula'], 'password' => Hash::make('password123'), 'activo' => true]
             );
             $usuario->assignRole($dato['rol']);
             $usuarios[$dato['email']] = $usuario;

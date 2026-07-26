@@ -25,6 +25,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'apellido' => $data['apellido'],
+            'cedula' => $data['cedula'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'activo' => $data['activo'] ?? true,
@@ -51,6 +52,9 @@ class UserController extends Controller
         }
         if (isset($data['apellido'])) {
             $user->apellido = $data['apellido'];
+        }
+        if (isset($data['cedula'])) {
+            $user->cedula = $data['cedula'];
         }
         if (isset($data['email'])) {
             $user->email = $data['email'];

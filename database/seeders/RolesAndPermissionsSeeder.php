@@ -59,6 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'coordinador@brigadasalud.test'],
             [
                 'name' => 'Coordinador General',
+                'cedula' => '1717171712',
                 'password' => Hash::make('password123'),
                 'activo' => true,
             ]
@@ -69,6 +70,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ['email' => 'administrador@brigadasalud.test'],
             [
                 'name' => 'Administrador de la Plataforma',
+                'cedula' => '0909090904',
                 'password' => Hash::make('password123'),
                 'activo' => true,
             ]

@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::put('/me', [AuthController::class, 'updateMe']);
 
         // Preferencias propias del usuario autenticado: no requiere permiso especial.
         Route::get('/preferencias', [PreferenciaController::class, 'show']);

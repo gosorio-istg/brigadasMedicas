@@ -1,6 +1,6 @@
 # BrigadaMedica API
 
-Backend del sistema **BrigadaSalud**: plataforma web y aplicación móvil para la gestión de brigadas médicas comunitarias en barrios urbano-marginales de Guayaquil (registro de pacientes, asignación de turnos por especialidad y atención médica), reemplazando los procesos manuales en papel.
+Backend del sistema **BrigadaMedica**: plataforma web y aplicación móvil para la gestión de brigadas médicas comunitarias en barrios urbano-marginales de Guayaquil (registro de pacientes, asignación de turnos por especialidad y atención médica), reemplazando los procesos manuales en papel.
 
 ![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)
 ![Laravel](https://img.shields.io/badge/Laravel-10.x-ff2d20)
