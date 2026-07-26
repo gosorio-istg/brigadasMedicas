@@ -787,6 +787,7 @@ select.form-control {
 .chip-atendido { background: var(--color-success-light); color: #15803D; }
 .chip-cancelado { background: var(--color-error-light); color: var(--color-error); }
 .chip-espera { background: #F1F5F9; color: #475569; }
+.chip-no-asistio { background: #F3E8FF; color: #6B21A8; }
 
 .chip-programada { background: var(--color-info-light); color: #1D4ED8; }
 .chip-en-curso { background: var(--color-warning-light); color: #B45309; }
@@ -884,6 +885,118 @@ select.form-control {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ==========================================
+   TARJETA DE CAMPAÑA (listado de Campañas)
+   Tratamiento tipo "ficha de evento": insignia de fecha + chips de
+   especialidad, para reconocer una campaña de un vistazo sin leer texto.
+   ========================================== */
+.campana-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+}
+
+.campana-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--color-primary-light);
+}
+
+.campana-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.campana-fecha-badge {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+}
+
+.campana-fecha-dia { font-size: 1.2rem; font-weight: 700; }
+.campana-fecha-mes { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.campana-card--en_curso .campana-fecha-badge { background: var(--color-warning-light); color: #B45309; }
+.campana-card--finalizada .campana-fecha-badge { background: var(--color-background); color: var(--color-text-muted); }
+.campana-card--cancelada .campana-fecha-badge { background: var(--color-error-light); color: var(--color-error); opacity: 0.85; }
+
+.campana-card-heading { flex: 1; min-width: 0; }
+.campana-card-heading .campana-card-title { font-size: var(--font-size-h4); font-weight: 600; }
+
+.campana-card-ubicacion {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.campana-card-ubicacion .material-symbols-rounded { font-size: 16px; flex-shrink: 0; }
+
+.chip-vivo { display: inline-flex; align-items: center; gap: 5px; }
+
+.punto-vivo {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulso-vivo 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .punto-vivo { animation: none; }
+}
+
+@keyframes pulso-vivo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.campana-card-especialidades { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.campana-card-footer {
+  margin-top: auto;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.campana-card-capacidad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.campana-card-capacidad .material-symbols-rounded { font-size: 16px; }
+
+.campana-card-acciones { display: flex; gap: 8px; }
+.campana-card-acciones .btn { flex: 1; }
+
+.filter-chip .filter-chip-count {
+  margin-left: 4px;
+  opacity: 0.7;
+  font-size: 0.9em;
 }
 
 .medico-card {

@@ -200,7 +200,7 @@ function initGlobalSearch() {
       items: coincidencias.map(b => ({
         texto: b.nombre,
         subtexto: b.ubicacion,
-        href: `/brigadas?brigada_id=${b.id}`,
+        href: `/brigadas/${b.id}`,
       })),
     };
   }
@@ -370,6 +370,7 @@ function estadoTurnoChipClass(estado) {
     en_espera: 'chip-espera',
     atendido: 'chip-atendido',
     cancelado: 'chip-cancelado',
+    no_asistio: 'chip-no-asistio',
   };
   return mapa[estado] || 'chip-pendiente';
 }
@@ -380,6 +381,7 @@ function estadoTurnoLabel(estado) {
     en_espera: 'En espera',
     atendido: 'Atendido',
     cancelado: 'Cancelado',
+    no_asistio: 'No asistió',
   };
   return mapa[estado] || estado;
 }

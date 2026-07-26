@@ -26,6 +26,7 @@
     <button class="filter-chip" data-estado="en_espera">En espera</button>
     <button class="filter-chip" data-estado="atendido">Atendido</button>
     <button class="filter-chip" data-estado="cancelado">Cancelado</button>
+    <button class="filter-chip" data-estado="no_asistio">No asistió</button>
   </nav>
 
   <div class="table-responsive">
@@ -37,10 +38,11 @@
           <th>Especialidad</th>
           <th>Estado</th>
           <th>Hora</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody id="tabla-turnos-body">
-        <tr><td colspan="5">Cargando...</td></tr>
+        <tr><td colspan="6">Cargando...</td></tr>
       </tbody>
     </table>
   </div>
@@ -95,9 +97,9 @@
         <div id="bloque-paciente-existente">
           <div class="form-group">
             <label class="form-label" for="buscar-paciente">Cédula o nombre</label>
-            <div style="display:flex;gap:8px">
-              <input type="text" id="buscar-paciente" class="form-control" placeholder="Ej. 0912345678">
-              <button type="button" class="btn btn-outline btn-sm" id="btn-buscar-paciente">Buscar</button>
+            <div class="search-input-wrap">
+              <span class="material-symbols-rounded">search</span>
+              <input type="text" id="buscar-paciente" class="form-control" placeholder="Escribe al menos 3 caracteres...">
             </div>
           </div>
           <div id="resultados-paciente" style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--space-sm)"></div>
@@ -175,16 +177,32 @@
     if (brigadasRes.ok) {
       brigadasCache = brigadasRes.data;
       const selectFiltro = document.getElementById('filtro-brigada');
+      // El filtro de arriba sirve para revisar turnos de cualquier campaña, incluidas
+      // las ya finalizadas/canceladas. Pero para REGISTRAR un turno nuevo solo tiene
+      // sentido elegir entre las que siguen activas (programada o en curso).
+      const opcionesFiltro = brigadasCache.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
+      selectFiltro.insertAdjacentHTML('beforeend', opcionesFiltro);
+
+      const activas = brigadasCache.filter(b => b.estado === 'programada' || b.estado === 'en_curso');
       const selectTurno = document.getElementById('turno-brigada');
-      const opciones = brigadasCache.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
-      selectFiltro.insertAdjacentHTML('beforeend', opciones);
-      selectTurno.innerHTML = '<option value="">Selecciona una campaña</option>' + opciones;
+      selectTurno.innerHTML = '<option value="">Selecciona una campaña</option>' +
+        activas.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
     }
     cargarTurnos();
 
     // Llega desde el buscador global (topbar) con ?paciente_id=... -> abre su ficha directo.
-    const idDesdeUrl = new URLSearchParams(window.location.search).get('paciente_id');
-    if (idDesdeUrl) mostrarFichaPaciente(parseInt(idDesdeUrl, 10));
+    const params = new URLSearchParams(window.location.search);
+    const pacienteIdUrl = params.get('paciente_id');
+    if (pacienteIdUrl) mostrarFichaPaciente(parseInt(pacienteIdUrl, 10));
+
+    // Llega desde "Registrar turno" en el detalle de una campaña -> abre el modal
+    // con esa campaña ya seleccionada, lista para elegir especialidad y paciente.
+    const brigadaIdUrl = params.get('brigada_id');
+    if (brigadaIdUrl && params.get('nuevo_turno')) {
+      openModal('modal-nuevo-turno');
+      document.getElementById('turno-brigada').value = brigadaIdUrl;
+      pintarSelectEspecialidades(brigadaIdUrl);
+    }
   }
 
   async function cargarTurnos(pagina = 1) {
@@ -195,11 +213,11 @@
     if (estadoFiltro) ruta += `&estado=${estadoFiltro}`;
 
     const cuerpo = document.getElementById('tabla-turnos-body');
-    cuerpo.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+    cuerpo.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
 
     const resultado = await Api.get(ruta);
     if (!resultado.ok) {
-      cuerpo.innerHTML = `<tr><td colspan="5">${resultado.message}</td></tr>`;
+      cuerpo.innerHTML = `<tr><td colspan="6">${resultado.message}</td></tr>`;
       return;
     }
 
@@ -211,9 +229,11 @@
   function pintarTurnos() {
     const cuerpo = document.getElementById('tabla-turnos-body');
     if (!turnosCache.length) {
-      cuerpo.innerHTML = '<tr><td colspan="5">No hay turnos con estos filtros.</td></tr>';
+      cuerpo.innerHTML = '<tr><td colspan="6">No hay turnos con estos filtros.</td></tr>';
       return;
     }
+
+    const enCurso = ['pendiente', 'en_espera'];
 
     cuerpo.innerHTML = turnosCache.map(t => `
       <tr data-paciente-id="${t.paciente?.id ?? ''}" style="cursor:pointer">
@@ -222,12 +242,34 @@
         <td data-label="Especialidad"><span class="chip ${especialidadChipClass(t.especialidad?.nombre)}">${t.especialidad?.nombre ?? ''}</span></td>
         <td data-label="Estado"><span class="chip ${estadoTurnoChipClass(t.estado)}">${estadoTurnoLabel(t.estado)}</span></td>
         <td data-label="Hora">${formatearHora(t.hora_registro)}</td>
+        <td data-label="Acciones">
+          ${enCurso.includes(t.estado) ? `
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button type="button" class="btn btn-outline btn-sm" data-marcar-turno="${t.id}" data-nuevo-estado="atendido">Atendido</button>
+              <button type="button" class="btn btn-outline btn-sm" data-marcar-turno="${t.id}" data-nuevo-estado="no_asistio">No asistió</button>
+              <button type="button" class="btn btn-outline btn-sm" data-marcar-turno="${t.id}" data-nuevo-estado="cancelado">Cancelar</button>
+            </div>` : '—'}
+        </td>
       </tr>`).join('');
 
     cuerpo.querySelectorAll('tr[data-paciente-id]').forEach(fila => {
       fila.addEventListener('click', () => {
         const id = fila.dataset.pacienteId;
         if (id) mostrarFichaPaciente(parseInt(id, 10));
+      });
+    });
+
+    cuerpo.querySelectorAll('[data-marcar-turno]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const nuevoEstado = btn.dataset.nuevoEstado;
+        const resultado = await Api.put(`/turnos/${btn.dataset.marcarTurno}`, { estado: nuevoEstado });
+        if (!resultado.ok) {
+          showToast(resultado.message, 'error');
+          return;
+        }
+        showToast(`Turno marcado como "${estadoTurnoLabel(nuevoEstado)}".`);
+        cargarTurnos(paginaActual);
       });
     });
   }
@@ -326,6 +368,8 @@
       document.getElementById('bloque-paciente-nuevo').style.display = esExistente ? 'none' : 'block';
       pacienteSeleccionadoId = null;
       document.getElementById('paciente-seleccionado-texto').textContent = '';
+      document.getElementById('buscar-paciente').value = '';
+      document.getElementById('resultados-paciente').innerHTML = '';
     });
   });
 
@@ -343,13 +387,33 @@
     });
   });
 
-  document.getElementById('btn-buscar-paciente').addEventListener('click', async () => {
-    const termino = document.getElementById('buscar-paciente').value.trim();
-    const contenedor = document.getElementById('resultados-paciente');
-    if (!termino) { contenedor.innerHTML = ''; return; }
+  // Búsqueda dinámica: apenas se escriben 3+ caracteres (con una pequeña pausa para no
+  // disparar una petición por cada tecla), se buscan coincidencias automáticamente.
+  let temporizadorBusquedaPaciente = null;
+  let idBusquedaPaciente = 0;
 
-    contenedor.innerHTML = 'Buscando...';
+  document.getElementById('buscar-paciente').addEventListener('input', function () {
+    const termino = this.value.trim();
+    const contenedor = document.getElementById('resultados-paciente');
+
+    clearTimeout(temporizadorBusquedaPaciente);
+
+    if (termino.length < 3) {
+      contenedor.innerHTML = '';
+      return;
+    }
+
+    contenedor.innerHTML = '<p class="page-subtitle">Buscando...</p>';
+    temporizadorBusquedaPaciente = setTimeout(() => buscarPacienteExistente(termino), 300);
+  });
+
+  async function buscarPacienteExistente(termino) {
+    const miId = ++idBusquedaPaciente;
+    const contenedor = document.getElementById('resultados-paciente');
+
     const resultado = await Api.get(`/pacientes?buscar=${encodeURIComponent(termino)}`);
+    if (miId !== idBusquedaPaciente) return; // llegó una búsqueda más nueva mientras esperábamos
+
     if (!resultado.ok || !resultado.data.length) {
       contenedor.innerHTML = '<p class="page-subtitle">Sin resultados. Usa "Registro asistido" para crearlo.</p>';
       return;
@@ -364,9 +428,11 @@
       b.addEventListener('click', () => {
         pacienteSeleccionadoId = parseInt(b.dataset.elegirPaciente, 10);
         document.getElementById('paciente-seleccionado-texto').textContent = `Seleccionado: ${b.textContent.trim()}`;
+        document.getElementById('resultados-paciente').innerHTML = '';
+        document.getElementById('buscar-paciente').value = b.textContent.trim();
       });
     });
-  });
+  }
 
   document.getElementById('form-turno').addEventListener('submit', async function (e) {
     e.preventDefault();

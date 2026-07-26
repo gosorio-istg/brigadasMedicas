@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\CedulaEcuatoriana;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTurnoRequest extends FormRequest
 {
@@ -17,7 +18,16 @@ class StoreTurnoRequest extends FormRequest
 
             // Registro asistido: se envía paciente_id (paciente ya existe) o el bloque
             // "paciente" con sus datos para crearlo en la misma petición.
-            'paciente_id' => ['required_without:paciente', 'integer', 'exists:pacientes,id'],
+            'paciente_id' => [
+                'required_without:paciente', 'integer', 'exists:pacientes,id',
+                // Antes no existía este chequeo: se podía registrar al mismo paciente
+                // dos veces en la misma campaña y especialidad sin ningún aviso. No
+                // aplica si su turno anterior ahí fue cancelado (sí puede volver a pasar).
+                Rule::unique('turnos', 'paciente_id')->where(fn ($query) => $query
+                    ->where('brigada_id', $this->input('brigada_id'))
+                    ->where('especialidad_id', $this->input('especialidad_id'))
+                    ->where('estado', '!=', 'cancelado')),
+            ],
             'paciente' => ['required_without:paciente_id', 'array'],
             // Antes no exigía "unique": un registro asistido podía duplicar la cédula de
             // un paciente que ya existía. Mismas reglas que Store/UpdatePacienteRequest.

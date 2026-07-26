@@ -11,11 +11,11 @@
   </header>
 
   <nav class="filter-bar" data-filter-group="brigadas" aria-label="Filtrar campañas">
-    <button class="filter-chip is-active" data-filter="all">Todas</button>
-    <button class="filter-chip" data-filter="programada">Programadas</button>
-    <button class="filter-chip" data-filter="en_curso">En curso</button>
-    <button class="filter-chip" data-filter="finalizada">Finalizadas</button>
-    <button class="filter-chip" data-filter="cancelada">Canceladas</button>
+    <button class="filter-chip is-active" data-filter="all" data-label="Todas">Todas</button>
+    <button class="filter-chip" data-filter="programada" data-label="Programadas">Programadas</button>
+    <button class="filter-chip" data-filter="en_curso" data-label="En curso">En curso</button>
+    <button class="filter-chip" data-filter="finalizada" data-label="Finalizadas">Finalizadas</button>
+    <button class="filter-chip" data-filter="cancelada" data-label="Canceladas">Canceladas</button>
   </nav>
 
   <div class="card-grid" id="lista-brigadas">
@@ -30,18 +30,6 @@
   </a>
 @endsection
 
-@section('modals')
-  <div class="modal-overlay" id="modal-detalle">
-    <div class="modal" role="dialog" aria-labelledby="modal-title">
-      <h2 class="modal-title" id="modal-title">Detalle de campaña</h2>
-      <div class="modal-body" id="modal-detalle-body">Cargando...</div>
-      <div class="modal-actions">
-        <button class="btn btn-primary" data-modal-close>Cerrar</button>
-      </div>
-    </div>
-  </div>
-@endsection
-
 @section('scripts')
 <script>
   // El FAB fijo abajo a la derecha (versión "fab", no "bottom-nav-fab") se muestra
@@ -51,6 +39,12 @@
   }
 
   let brigadasCache = [];
+  const MESES_ABREV = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+  function partesFecha(fechaIso) {
+    const [anio, mes, dia] = fechaIso.split('T')[0].split('-');
+    return { dia: parseInt(dia, 10), mes: MESES_ABREV[parseInt(mes, 10) - 1] };
+  }
 
   async function cargarBrigadas() {
     const resultado = await Api.get('/brigadas?per_page=100');
@@ -68,54 +62,69 @@
     }
 
     pintarBrigadas();
+    pintarContadoresFiltro();
+  }
 
-    // Llega desde el buscador global (topbar) con ?brigada_id=... -> abre su detalle directo.
-    const idDesdeUrl = new URLSearchParams(window.location.search).get('brigada_id');
-    if (idDesdeUrl) mostrarDetalle(parseInt(idDesdeUrl, 10));
+  function estaActiva(brigada) {
+    return brigada.estado === 'programada' || brigada.estado === 'en_curso';
+  }
+
+  function pintarContadoresFiltro() {
+    document.querySelectorAll('.filter-bar[data-filter-group="brigadas"] .filter-chip').forEach(chip => {
+      const filtro = chip.dataset.filter;
+      const total = filtro === 'all' ? brigadasCache.length : brigadasCache.filter(b => b.estado === filtro).length;
+      chip.innerHTML = `${chip.dataset.label} <span class="filter-chip-count">(${total})</span>`;
+    });
   }
 
   function pintarBrigadas() {
     const contenedor = document.getElementById('lista-brigadas');
-    contenedor.innerHTML = brigadasCache.map(b => `
-      <article class="brigada-card" data-filter-target="brigadas" data-status="${b.estado}">
-        <div class="brigada-card-header">
-          <h3 class="brigada-card-title">${b.nombre}</h3>
-          <span class="chip ${estadoBrigadaChipClass(b.estado)}">${estadoBrigadaLabel(b.estado)}</span>
-        </div>
-        <div class="brigada-card-meta">
-          <span><span class="material-symbols-rounded">calendar_month</span> ${formatearFecha(b.fecha)}</span>
-          <span><span class="material-symbols-rounded">location_on</span> ${b.ubicacion}</span>
-          <span><span class="material-symbols-rounded">medical_information</span> ${(b.especialidades || []).map(e => e.nombre).join(', ') || 'Sin especialidades'}</span>
-        </div>
-        <button class="btn btn-outline btn-sm" data-ver-brigada="${b.id}">Ver detalles</button>
-      </article>`).join('');
+    contenedor.innerHTML = brigadasCache.map(b => {
+      const fecha = partesFecha(b.fecha);
+      const especialidades = b.especialidades || [];
+      const chipsVisibles = especialidades.slice(0, 3)
+        .map(e => `<span class="chip ${especialidadChipClass(e.nombre)}">${e.nombre}</span>`).join('');
+      const restantes = especialidades.length - 3;
+      const totalCupos = especialidades.reduce((suma, e) => suma + (e.cupos || 0), 0);
+      const enVivo = b.estado === 'en_curso';
 
-    contenedor.querySelectorAll('[data-ver-brigada]').forEach(btn => {
-      btn.addEventListener('click', () => mostrarDetalle(parseInt(btn.dataset.verBrigada, 10)));
-    });
+      return `
+      <article class="campana-card campana-card--${b.estado}" data-filter-target="brigadas" data-status="${b.estado}">
+        <div class="campana-card-top">
+          <div class="campana-fecha-badge">
+            <span class="campana-fecha-dia">${fecha.dia}</span>
+            <span class="campana-fecha-mes">${fecha.mes}</span>
+          </div>
+          <div class="campana-card-heading">
+            <h3 class="campana-card-title">${b.nombre}</h3>
+            <span class="campana-card-ubicacion"><span class="material-symbols-rounded">location_on</span>${b.ubicacion}</span>
+          </div>
+          <span class="chip ${estadoBrigadaChipClass(b.estado)} ${enVivo ? 'chip-vivo' : ''}">
+            ${enVivo ? '<span class="punto-vivo"></span>' : ''}${estadoBrigadaLabel(b.estado)}
+          </span>
+        </div>
+
+        <div class="campana-card-especialidades">
+          ${chipsVisibles || '<span class="page-subtitle">Sin especialidades asignadas</span>'}
+          ${restantes > 0 ? `<span class="chip chip-especialidad-otra">+${restantes}</span>` : ''}
+        </div>
+
+        <div class="campana-card-footer">
+          <span class="campana-card-capacidad">
+            <span class="material-symbols-rounded">groups</span>
+            ${especialidades.length} especialidad${especialidades.length === 1 ? '' : 'es'} · ${totalCupos} cupos en total
+          </span>
+          <div class="campana-card-acciones">
+            <a href="/brigadas/${b.id}" class="btn btn-outline btn-sm">Ver detalles</a>
+            ${estaActiva(b) ? `<a href="/pacientes?brigada_id=${b.id}&nuevo_turno=1" class="btn btn-primary btn-sm">Registrar turno</a>` : ''}
+          </div>
+        </div>
+      </article>`;
+    }).join('');
 
     // Re-inicializa los filter-chips ya existentes en app.js para que reconozcan
     // las tarjetas recién insertadas (initFilterChips corrió antes de tener datos).
     initFilterChips();
-  }
-
-  function mostrarDetalle(id) {
-    const brigada = brigadasCache.find(b => b.id === id);
-    if (!brigada) return;
-
-    const especialidades = (brigada.especialidades || [])
-      .map(e => `${e.nombre} (${e.cupos} cupos)`)
-      .join(', ') || 'Sin especialidades asignadas';
-
-    document.getElementById('modal-detalle-body').innerHTML = `
-      <div class="detail-row"><span class="detail-label">Estado</span><span class="chip ${estadoBrigadaChipClass(brigada.estado)}">${estadoBrigadaLabel(brigada.estado)}</span></div>
-      <div class="detail-row"><span class="detail-label">Fecha</span><span>${formatearFecha(brigada.fecha)}</span></div>
-      <div class="detail-row"><span class="detail-label">Ubicación</span><span>${brigada.ubicacion}</span></div>
-      <div class="detail-row"><span class="detail-label">Coordinador</span><span>${brigada.coordinador?.name ?? '—'}</span></div>
-      ${brigada.descripcion ? `<div class="detail-row"><span class="detail-label">Descripción</span><span>${brigada.descripcion}</span></div>` : ''}
-      <h3 style="font-size:var(--font-size-small);margin:var(--space-md) 0 var(--space-sm)">Especialidades</h3>
-      <p style="font-size:var(--font-size-small);color:var(--color-text-muted)">${especialidades}</p>`;
-    openModal('modal-detalle');
   }
 
   cargarBrigadas();

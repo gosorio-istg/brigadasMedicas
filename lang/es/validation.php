@@ -135,6 +135,9 @@ return [
         'paciente.telefono' => [
             'regex' => 'El teléfono debe tener entre 7 y 10 dígitos numéricos.',
         ],
+        'paciente_id' => [
+            'unique' => 'Este paciente ya tiene un turno registrado en esta especialidad para esta campaña.',
+        ],
     ],
 
     // Nombres en español de los campos de este proyecto, para que los mensajes de arriba

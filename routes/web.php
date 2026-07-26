@@ -27,6 +27,7 @@ Route::view('/dashboard', 'app.dashboard')->name('dashboard');
 
 Route::view('/brigadas', 'app.brigadas.index')->name('brigadas.index');
 Route::view('/brigadas/nueva', 'app.brigadas.crear')->name('brigadas.crear');
+Route::view('/brigadas/{id}', 'app.brigadas.detalle')->name('brigadas.detalle');
 
 Route::view('/pacientes', 'app.pacientes.index')->name('pacientes.index');
 

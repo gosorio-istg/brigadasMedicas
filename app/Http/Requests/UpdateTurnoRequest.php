@@ -11,7 +11,7 @@ class UpdateTurnoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'estado' => ['required', 'in:pendiente,en_espera,atendido,cancelado'],
+            'estado' => ['required', 'in:pendiente,en_espera,atendido,cancelado,no_asistio'],
             'medico_id' => ['sometimes', 'nullable', 'integer', 'exists:medicos,id'],
         ];
     }

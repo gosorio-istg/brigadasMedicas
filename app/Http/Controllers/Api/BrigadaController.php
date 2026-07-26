@@ -69,6 +69,19 @@ class BrigadaController extends Controller
     {
         $data = $request->validated();
 
+        // No tenía ningún resguardo: se podía finalizar una campaña con pacientes
+        // todavía en cola (pendientes o en espera), dejándolos sin ninguna atención
+        // registrada. Deben quedar resueltos (atendido/cancelado/no_asistio) antes.
+        if (($data['estado'] ?? null) === 'finalizada') {
+            $pendientes = $brigada->turnos()->whereIn('estado', ['pendiente', 'en_espera'])->count();
+
+            if ($pendientes > 0) {
+                return response()->json([
+                    'message' => "No se puede finalizar: todavía hay {$pendientes} turno(s) pendiente(s) o en espera. Márcalos como atendidos, cancelados o \"no asistió\" antes de finalizar la campaña.",
+                ], 422);
+            }
+        }
+
         $brigada->fill([
             'nombre' => $data['nombre'] ?? $brigada->nombre,
             'descripcion' => array_key_exists('descripcion', $data) ? $data['descripcion'] : $brigada->descripcion,
