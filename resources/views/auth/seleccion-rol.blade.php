@@ -32,7 +32,7 @@
   };
   const descripcionesPorRol = {
     Administrador: 'Configuración general de la plataforma',
-    Coordinador: 'Gestión de brigadas, pacientes y reportes',
+    Coordinador: 'Gestión de campañas, pacientes y reportes',
     Brigadista: 'Registro de pacientes y turnos en campo',
   };
 

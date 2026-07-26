@@ -15,12 +15,12 @@
     <form id="form-medico" novalidate>
       <div class="form-group">
         <label class="form-label" for="nombres">Nombres completos</label>
-        <input type="text" id="nombres" class="form-control" placeholder="Ej. Dr. Carlos Mendoza" required>
+        <input type="text" id="nombres" class="form-control" placeholder="Ej. Dr. Carlos Mendoza" required autocapitalize="words">
         <span class="form-error-msg" id="error-nombres" hidden></span>
       </div>
       <div class="form-group">
         <label class="form-label" for="credencial_cmp">Credencial CMP</label>
-        <input type="text" id="credencial_cmp" class="form-control" placeholder="Ej. CMP-12345" required>
+        <input type="text" id="credencial_cmp" class="form-control" placeholder="Ej. CMP-1001" required>
         <span class="form-error-msg" id="error-credencial_cmp" hidden></span>
       </div>
       <div class="form-group">
@@ -52,6 +52,23 @@
 @section('scripts')
 <script>
   const medicoId = @json($id ?? null);
+
+  // Solo letras/espacios/puntos (permite "Dr.", "Lcda.", etc.), igual que valida el backend.
+  document.getElementById('nombres').addEventListener('input', function () {
+    this.value = this.value.replace(/[^\p{L}\s.'-]/gu, '');
+  });
+  // Capitaliza cada palabra al salir del campo (Ej. "carlos mendoza" -> "Carlos Mendoza").
+  document.getElementById('nombres').addEventListener('blur', function () {
+    this.value = this.value.replace(/\S+/g, palabra =>
+      palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase());
+  });
+
+  // Fuerza el formato exacto CMP-0000 mientras se escribe, en vez de dejar
+  // que el usuario mande cualquier cosa y recién avisarle en el servidor.
+  document.getElementById('credencial_cmp').addEventListener('input', function () {
+    const digitos = this.value.toUpperCase().replace(/[^0-9]/g, '').slice(0, 4);
+    this.value = digitos ? `CMP-${digitos}` : '';
+  });
 
   function limpiarErrores() {
     document.querySelectorAll('.form-error-msg').forEach(el => { el.hidden = true; el.textContent = ''; });

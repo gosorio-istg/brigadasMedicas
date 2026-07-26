@@ -12,8 +12,8 @@ class UpdateMedicoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombres' => ['sometimes', 'required', 'string', 'max:150'],
-            'credencial_cmp' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('medicos', 'credencial_cmp')->ignore($this->route('medico'))],
+            'nombres' => ['sometimes', 'required', 'string', 'max:150', 'regex:/^[\p{L}\s\.\'-]+$/u'],
+            'credencial_cmp' => ['sometimes', 'required', 'string', 'regex:/^CMP-\d{4}$/', Rule::unique('medicos', 'credencial_cmp')->ignore($this->route('medico'))],
             'especialidad_id' => ['sometimes', 'required', 'integer', 'exists:especialidades,id'],
             'telefono' => ['sometimes', 'nullable', 'string', 'max:20'],
             'disponible' => ['sometimes', 'boolean'],

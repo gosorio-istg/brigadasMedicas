@@ -9,7 +9,7 @@
       <span class="auth-brand-name">BrigadaMedica</span>
     </div>
     <h1 class="auth-title">Iniciar sesión</h1>
-    <p class="auth-subtitle">Panel del Coordinador — Brigadas médicas comunitarias</p>
+    <p class="auth-subtitle">Panel del Coordinador — Campañas médicas comunitarias</p>
   </header>
 
   <form id="login-form" novalidate>

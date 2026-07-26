@@ -75,6 +75,21 @@ function openModal(id) {
   document.getElementById(id)?.classList.add('is-open');
 }
 
+// Oculta del sidebar y del bottom-nav los enlaces a módulos para los que este usuario
+// no tiene permiso, en vez de dejar que entre y se encuentre con un 403. Si un grupo
+// entero del sidebar se queda sin ningún enlace visible, se oculta también su rótulo.
+function aplicarPermisosMenu() {
+  document.querySelectorAll('[data-requiere-permiso]').forEach(el => {
+    if (!hasPermission(el.dataset.requierePermiso)) el.style.display = 'none';
+  });
+
+  document.querySelectorAll('[data-sidebar-section]').forEach(seccion => {
+    const quedaAlgunoVisible = [...seccion.querySelectorAll('.sidebar-link')]
+      .some(enlace => enlace.style.display !== 'none');
+    seccion.style.display = quedaAlgunoVisible ? '' : 'none';
+  });
+}
+
 function initUserMenu() {
   const menu = document.getElementById('user-menu');
   const trigger = document.getElementById('user-menu-trigger');
@@ -180,7 +195,7 @@ function initGlobalSearch() {
     const coincidencias = lista.filter(b => b.nombre.toLowerCase().includes(terminoMin)).slice(0, 5);
     if (!coincidencias.length) return null;
     return {
-      titulo: 'Brigadas',
+      titulo: 'Campañas',
       icono: 'groups',
       items: coincidencias.map(b => ({
         texto: b.nombre,

@@ -12,14 +12,30 @@
     <div class="sidebar-brand"><span class="material-symbols-rounded">medical_services</span> BrigadaMedica</div>
     <nav class="sidebar-nav" aria-label="Navegación principal">
       <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
-      <a href="{{ route('brigadas.index') }}" class="sidebar-link {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">groups</span> Brigadas</a>
-      <a href="{{ route('pacientes.index') }}" class="sidebar-link {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">personal_injury</span> Pacientes</a>
-      <a href="{{ route('medicos.index') }}" class="sidebar-link {{ request()->routeIs('medicos.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">stethoscope</span> Médicos</a>
-      <a href="{{ route('brigadistas.index') }}" class="sidebar-link {{ request()->routeIs('brigadistas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">volunteer_activism</span> Brigadistas</a>
-      <a href="{{ route('comunidades.index') }}" class="sidebar-link {{ request()->routeIs('comunidades.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">location_city</span> Comunidades</a>
-      <a href="{{ route('reportes.index') }}" class="sidebar-link {{ request()->routeIs('reportes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">bar_chart</span> Reportes</a>
-      <a href="{{ route('noticias.index') }}" class="sidebar-link {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">newspaper</span> Noticias</a>
-      <a href="{{ route('configuracion.index') }}" class="sidebar-link {{ request()->routeIs('configuracion.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">settings</span> Configuración</a>
+
+      {{-- Operación: todo lo que gira en torno a ejecutar una brigada, en el orden en que se usa. --}}
+      <div class="sidebar-section" data-sidebar-section>
+        <div class="sidebar-section-label">Operación</div>
+        <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">groups</span> Campañas</a>
+        <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="sidebar-link {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">personal_injury</span> Pacientes</a>
+        <a href="{{ route('medicos.index') }}" data-requiere-permiso="medicos.gestionar" class="sidebar-link {{ request()->routeIs('medicos.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">stethoscope</span> Médicos</a>
+        <a href="{{ route('brigadistas.index') }}" data-requiere-permiso="brigadistas.gestionar" class="sidebar-link {{ request()->routeIs('brigadistas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">volunteer_activism</span> Brigadistas</a>
+        <a href="{{ route('comunidades.index') }}" data-requiere-permiso="comunidades.gestionar" class="sidebar-link {{ request()->routeIs('comunidades.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">location_city</span> Comunidades</a>
+      </div>
+
+      {{-- Análisis y comunicación: se consultan una vez que ya hay operación registrada. --}}
+      <div class="sidebar-section" data-sidebar-section>
+        <div class="sidebar-section-label">Análisis</div>
+        <a href="{{ route('reportes.index') }}" data-requiere-permiso="reportes.ver" class="sidebar-link {{ request()->routeIs('reportes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">bar_chart</span> Reportes</a>
+        <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="sidebar-link {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">newspaper</span> Noticias</a>
+      </div>
+
+      {{-- Administración: quién entra al sistema y cómo está configurado. --}}
+      <div class="sidebar-section" data-sidebar-section>
+        <div class="sidebar-section-label">Administración</div>
+        <a href="{{ route('usuarios.index') }}" data-requiere-permiso="usuarios.ver" class="sidebar-link {{ request()->routeIs('usuarios.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">manage_accounts</span> Usuarios</a>
+        <a href="{{ route('configuracion.index') }}" class="sidebar-link {{ request()->routeIs('configuracion.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">settings</span> Configuración</a>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <a href="#" id="btn-logout" class="sidebar-link sidebar-link--logout"><span class="material-symbols-rounded">logout</span> Cerrar sesión</a>
@@ -29,10 +45,9 @@
 
   <div class="app-main">
     <header class="topbar">
-      <button class="topbar-toggle icon-btn" id="sidebar-toggle" aria-label="Abrir menú"><span class="material-symbols-rounded">menu</span></button>
       <div class="topbar-search" id="global-search">
         <span class="material-symbols-rounded">search</span>
-        <input type="search" id="global-search-input" placeholder="Buscar pacientes, brigadas, médicos..." aria-label="Buscar" autocomplete="off">
+        <input type="search" id="global-search-input" placeholder="Buscar pacientes, campañas, médicos..." aria-label="Buscar" autocomplete="off">
         <div class="global-search-results" id="global-search-results"></div>
       </div>
       <div class="topbar-actions">
@@ -76,10 +91,14 @@
 
   <nav class="bottom-nav" aria-label="Navegación inferior">
     <a href="{{ route('dashboard') }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" aria-label="Inicio"><span class="material-symbols-rounded">home</span>Inicio</a>
-    <a href="{{ route('brigadas.index') }}" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Brigadas"><span class="material-symbols-rounded">groups</span>Brigadas</a>
-    <a href="{{ route('pacientes.index') }}" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
-    <a href="{{ route('noticias.index') }}" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>
-    <a href="{{ route('configuracion.index') }}" class="bottom-nav-item {{ request()->routeIs('configuracion.*') ? 'is-active' : '' }}" aria-label="Perfil"><span class="material-symbols-rounded">person</span>Perfil</a>
+    <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Campañas"><span class="material-symbols-rounded">groups</span>Campañas</a>
+    <div class="bottom-nav-spacer" aria-hidden="true"></div>
+    <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
+    <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>
+
+    <button class="bottom-nav-menu-btn" id="sidebar-toggle" aria-label="Abrir menú completo">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
   </nav>
 
   @yield('modals')
@@ -102,6 +121,7 @@
 
     initUserMenu();
     initGlobalSearch();
+    aplicarPermisosMenu();
 
     document.getElementById('btn-logout').addEventListener('click', (e) => {
       e.preventDefault();

@@ -11,8 +11,8 @@ class StoreMedicoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombres' => ['required', 'string', 'max:150'],
-            'credencial_cmp' => ['required', 'string', 'max:50', 'unique:medicos,credencial_cmp'],
+            'nombres' => ['required', 'string', 'max:150', 'regex:/^[\p{L}\s\.\'-]+$/u'],
+            'credencial_cmp' => ['required', 'string', 'regex:/^CMP-\d{4}$/', 'unique:medicos,credencial_cmp'],
             'especialidad_id' => ['required', 'integer', 'exists:especialidades,id'],
             'telefono' => ['sometimes', 'nullable', 'string', 'max:20'],
             'disponible' => ['sometimes', 'boolean'],

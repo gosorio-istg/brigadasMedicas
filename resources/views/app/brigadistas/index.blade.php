@@ -6,14 +6,14 @@
   <header class="page-header flex-between">
     <div>
       <h1>Brigadistas</h1>
-      <p class="page-subtitle">Equipo asignado a cada brigada y control de asistencia</p>
+      <p class="page-subtitle">Equipo asignado a cada campaña y control de asistencia</p>
     </div>
   </header>
 
   <div class="form-group" style="max-width:420px;margin-bottom:var(--space-md)">
-    <label class="form-label" for="selector-brigada">Brigada</label>
+    <label class="form-label" for="selector-brigada">Campaña</label>
     <select id="selector-brigada" class="form-control">
-      <option value="">Selecciona una brigada...</option>
+      <option value="">Selecciona una campaña...</option>
     </select>
   </div>
 
@@ -45,7 +45,7 @@
 
   <div class="empty-state" id="estado-vacio">
     <span class="material-symbols-rounded">groups</span>
-    <p>Selecciona una brigada para ver su equipo.</p>
+    <p>Selecciona una campaña para ver su equipo.</p>
   </div>
 @endsection
 
@@ -103,7 +103,7 @@
       select.innerHTML = `<option value="">${resultado.message}</option>`;
       return;
     }
-    select.innerHTML = '<option value="">Selecciona una brigada...</option>' +
+    select.innerHTML = '<option value="">Selecciona una campaña...</option>' +
       resultado.data.map(b => `<option value="${b.id}">${b.nombre} (${formatearFecha(b.fecha)})</option>`).join('');
   }
 
@@ -125,7 +125,7 @@
     }
 
     if (!resultado.data.length) {
-      cuerpo.innerHTML = '<tr><td colspan="5">Todavía no hay brigadistas asignados a esta brigada.</td></tr>';
+      cuerpo.innerHTML = '<tr><td colspan="5">Todavía no hay brigadistas asignados a esta campaña.</td></tr>';
       return;
     }
 

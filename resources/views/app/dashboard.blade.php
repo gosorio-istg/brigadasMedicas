@@ -5,7 +5,7 @@
 @section('content')
   <header class="page-header">
     <h1>Dashboard</h1>
-    <p class="page-subtitle">Resumen general de brigadas médicas comunitarias</p>
+    <p class="page-subtitle">Resumen general de campañas médicas comunitarias</p>
   </header>
 
   <section class="section-block">
@@ -17,10 +17,10 @@
     </div>
   </section>
 
-  <div class="grid-2">
+  <div class="grid-2" id="grid-resumen">
     <section class="section-block">
       <div class="flex-between">
-        <h2 class="section-title">Próximas brigadas</h2>
+        <h2 class="section-title">Próximas campañas</h2>
         <a href="{{ route('brigadas.index') }}" class="btn btn-ghost btn-sm" style="white-space:nowrap">Ver todas</a>
       </div>
       <div class="card-grid" id="proximas-brigadas">
@@ -28,7 +28,7 @@
       </div>
     </section>
 
-    <section class="section-block">
+    <section class="section-block" id="seccion-chart-especialidades">
       <h2 class="section-title">Atenciones por especialidad</h2>
       <div class="card">
         <div class="chart-bars" id="chart-especialidades">
@@ -38,7 +38,7 @@
     </section>
   </div>
 
-  <section class="section-block">
+  <section class="section-block" id="seccion-noticias">
     <div class="flex-between">
       <h2 class="section-title">Noticias recientes</h2>
       <a href="{{ route('noticias.index') }}" class="btn btn-ghost btn-sm" style="white-space:nowrap">Ver todas</a>
@@ -52,45 +52,54 @@
 @section('scripts')
 <script>
   async function cargarDashboard() {
+    // No se pide (ni se muestra) lo que este usuario no tiene permiso de ver: antes el
+    // dashboard llamaba a /medicos, /reportes/resumen y /noticias sin condición, así que
+    // a un Brigadista (que no tiene esos permisos) le tiraba tres 403 apenas entraba.
+    const puedeMedicos = hasPermission('medicos.gestionar');
+    const puedeReportes = hasPermission('reportes.ver');
+    const puedeNoticias = hasPermission('noticias.gestionar');
+
+    if (!puedeReportes) document.getElementById('seccion-chart-especialidades').remove();
+    if (!puedeNoticias) document.getElementById('seccion-noticias').remove();
+    if (!puedeReportes) document.getElementById('grid-resumen').style.gridTemplateColumns = '1fr';
+
     const [pacientesRes, brigadasRes, medicosRes, reporteRes, noticiasRes] = await Promise.all([
       Api.get('/pacientes?per_page=1'),
       Api.get('/brigadas?per_page=100'),
-      Api.get('/medicos?per_page=100'),
-      Api.get('/reportes/resumen'),
-      Api.get('/noticias?per_page=2'),
+      puedeMedicos ? Api.get('/medicos?per_page=100') : Promise.resolve(null),
+      puedeReportes ? Api.get('/reportes/resumen') : Promise.resolve(null),
+      puedeNoticias ? Api.get('/noticias?per_page=2') : Promise.resolve(null),
     ]);
 
     pintarEstadisticas(pacientesRes, brigadasRes, medicosRes, reporteRes);
     pintarProximasBrigadas(brigadasRes);
-    pintarChartEspecialidades(reporteRes);
-    pintarNoticias(noticiasRes);
+    if (puedeReportes) pintarChartEspecialidades(reporteRes);
+    if (puedeNoticias) pintarNoticias(noticiasRes);
   }
 
   function pintarEstadisticas(pacientesRes, brigadasRes, medicosRes, reporteRes) {
     const totalPacientes = pacientesRes.ok ? (pacientesRes.meta?.total ?? '—') : '—';
     const brigadas = brigadasRes.ok ? brigadasRes.data : [];
     const brigadasActivas = brigadas.filter(b => b.estado === 'en_curso').length;
-    const medicos = medicosRes.ok ? medicosRes.data : [];
-    const medicosDisponibles = medicos.filter(m => m.disponible).length;
-    const totalAtendidos = reporteRes.ok ? reporteRes.data.total_atendidos : '—';
 
-    document.getElementById('stat-grid').innerHTML = `
+    const tarjetas = [
+      { valor: totalPacientes, etiqueta: 'Pacientes registrados' },
+      { valor: brigadasActivas, etiqueta: 'Campañas en curso' },
+    ];
+
+    if (reporteRes) {
+      tarjetas.push({ valor: reporteRes.ok ? reporteRes.data.total_atendidos : '—', etiqueta: 'Total atendidos' });
+    }
+    if (medicosRes) {
+      const medicosDisponibles = medicosRes.ok ? medicosRes.data.filter(m => m.disponible).length : '—';
+      tarjetas.push({ valor: medicosDisponibles, etiqueta: 'Médicos disponibles' });
+    }
+
+    document.getElementById('stat-grid').innerHTML = tarjetas.map(t => `
       <div class="stat-card">
-        <div class="stat-card-value">${totalPacientes}</div>
-        <div class="stat-card-label">Pacientes registrados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-value">${brigadasActivas}</div>
-        <div class="stat-card-label">Brigadas en curso</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-value">${totalAtendidos}</div>
-        <div class="stat-card-label">Total atendidos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-value">${medicosDisponibles}</div>
-        <div class="stat-card-label">Médicos disponibles</div>
-      </div>`;
+        <div class="stat-card-value">${t.valor}</div>
+        <div class="stat-card-label">${t.etiqueta}</div>
+      </div>`).join('');
   }
 
   function pintarProximasBrigadas(brigadasRes) {
@@ -107,7 +116,7 @@
       .slice(0, 2);
 
     if (!proximas.length) {
-      contenedor.innerHTML = `<div class="empty-state"><span class="material-symbols-rounded">event_busy</span><p>No hay brigadas próximas programadas.</p></div>`;
+      contenedor.innerHTML = `<div class="empty-state"><span class="material-symbols-rounded">event_busy</span><p>No hay campañas próximas programadas.</p></div>`;
       return;
     }
 

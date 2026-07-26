@@ -44,4 +44,8 @@ Route::view('/noticias', 'app.noticias.index')->name('noticias.index');
 Route::view('/noticias/nueva', 'app.noticias.form')->name('noticias.crear');
 Route::view('/noticias/{id}/editar', 'app.noticias.form')->name('noticias.editar');
 
+Route::view('/usuarios', 'app.usuarios.index')->name('usuarios.index');
+Route::view('/usuarios/nuevo', 'app.usuarios.form')->name('usuarios.crear');
+Route::view('/usuarios/{id}/editar', 'app.usuarios.form')->name('usuarios.editar');
+
 Route::view('/configuracion', 'app.configuracion.index')->name('configuracion.index');

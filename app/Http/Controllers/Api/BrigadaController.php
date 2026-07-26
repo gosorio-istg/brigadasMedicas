@@ -12,6 +12,7 @@ use App\Http\Resources\BrigadaResource;
 use App\Http\Resources\BrigadistaResource;
 use App\Http\Resources\MedicoResource;
 use App\Models\Brigada;
+use App\Models\Turno;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,7 +47,22 @@ class BrigadaController extends Controller
 
     public function show(Brigada $brigada)
     {
-        return new BrigadaResource($brigada->load(['coordinador', 'especialidades']));
+        $brigada->load(['coordinador', 'especialidades']);
+
+        // Cupos "ocupados" = turnos ya registrados (no cancelados) para cada especialidad
+        // de esta brigada. Se calcula aquí (no en el index, para no hacer N+1 sobre el
+        // listado completo de brigadas) y solo se usa en esta respuesta puntual.
+        $turnosPorEspecialidad = Turno::where('brigada_id', $brigada->id)
+            ->where('estado', '!=', 'cancelado')
+            ->selectRaw('especialidad_id, count(*) as total')
+            ->groupBy('especialidad_id')
+            ->pluck('total', 'especialidad_id');
+
+        foreach ($brigada->especialidades as $especialidad) {
+            $especialidad->pivot->cupos_ocupados = $turnosPorEspecialidad[$especialidad->id] ?? 0;
+        }
+
+        return new BrigadaResource($brigada);
     }
 
     public function update(UpdateBrigadaRequest $request, Brigada $brigada)

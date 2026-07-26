@@ -91,7 +91,50 @@ return [
     'url' => 'El campo :attribute no es una URL válida.',
 
     'custom' => [
-        //
+        'fecha' => [
+            'after_or_equal' => 'La fecha de la campaña no puede ser anterior a hoy.',
+            'before_or_equal' => 'La fecha de la campaña es demasiado lejana; usa una fecha dentro de los próximos 2 años.',
+        ],
+        'nombre' => [
+            'regex' => 'El nombre solo puede contener letras, números, espacios y los signos . , # -',
+            'min' => 'El nombre es demasiado corto; escribe algo más descriptivo.',
+        ],
+        'ubicacion' => [
+            'regex' => 'La ubicación solo puede contener letras, números, espacios y los signos . , # -',
+            'min' => 'La ubicación es demasiado corta; escribe algo más descriptivo.',
+        ],
+        'nombres' => [
+            'regex' => 'El campo nombres solo puede contener letras y espacios.',
+        ],
+        'apellidos' => [
+            'regex' => 'El campo apellidos solo puede contener letras y espacios.',
+        ],
+        'credencial_cmp' => [
+            'regex' => 'La credencial CMP debe tener el formato CMP-0000 (CMP seguido de 4 dígitos).',
+        ],
+        'sector' => [
+            'regex' => 'El sector solo puede contener letras, números y espacios.',
+            'min' => 'El sector es demasiado corto.',
+        ],
+        'telefono' => [
+            'regex' => 'El teléfono debe tener entre 7 y 10 dígitos numéricos.',
+        ],
+        'paciente.cedula' => [
+            'regex' => 'La cédula debe tener 10 dígitos numéricos.',
+        ],
+        'paciente.nombres' => [
+            'regex' => 'El campo nombres solo puede contener letras y espacios.',
+        ],
+        'paciente.apellidos' => [
+            'regex' => 'El campo apellidos solo puede contener letras y espacios.',
+        ],
+        'paciente.sector' => [
+            'regex' => 'El sector solo puede contener letras, números y espacios.',
+            'min' => 'El sector es demasiado corto.',
+        ],
+        'paciente.telefono' => [
+            'regex' => 'El teléfono debe tener entre 7 y 10 dígitos numéricos.',
+        ],
     ],
 
     // Nombres en español de los campos de este proyecto, para que los mensajes de arriba
@@ -121,6 +164,13 @@ return [
         'brigada_id' => 'brigada',
         'paciente_id' => 'paciente',
         'paciente' => 'paciente',
+        'paciente.cedula' => 'cédula',
+        'paciente.nombres' => 'nombres',
+        'paciente.apellidos' => 'apellidos',
+        'paciente.fecha_nacimiento' => 'fecha de nacimiento',
+        'paciente.sexo' => 'sexo',
+        'paciente.telefono' => 'teléfono',
+        'paciente.sector' => 'sector',
         'medico_id' => 'médico',
         'medicos' => 'médicos',
         'credencial_cmp' => 'credencial profesional',

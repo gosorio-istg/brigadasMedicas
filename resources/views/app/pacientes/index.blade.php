@@ -15,8 +15,8 @@
       <span class="material-symbols-rounded">search</span>
       <input type="search" class="form-control" placeholder="Buscar por cédula o nombre en esta lista..." aria-label="Buscar pacientes" id="search-pacientes">
     </div>
-    <select class="form-control" id="filtro-brigada" aria-label="Filtrar por brigada">
-      <option value="">Todas las brigadas</option>
+    <select class="form-control" id="filtro-brigada" aria-label="Filtrar por campaña">
+      <option value="">Todas las campañas</option>
     </select>
   </div>
 
@@ -77,13 +77,13 @@
       <h2 class="modal-title">Registrar turno</h2>
       <form id="form-turno" novalidate>
         <div class="form-group">
-          <label class="form-label" for="turno-brigada">Brigada</label>
+          <label class="form-label" for="turno-brigada">Campaña</label>
           <select id="turno-brigada" class="form-control" required></select>
         </div>
         <div class="form-group">
           <label class="form-label" for="turno-especialidad">Especialidad</label>
           <select id="turno-especialidad" class="form-control" required>
-            <option value="">Selecciona primero una brigada</option>
+            <option value="">Selecciona primero una campaña</option>
           </select>
         </div>
 
@@ -107,22 +107,26 @@
         <div id="bloque-paciente-nuevo" style="display:none">
           <div class="form-group">
             <label class="form-label" for="np-cedula">Cédula</label>
-            <input type="text" id="np-cedula" class="form-control" maxlength="10">
+            <input type="text" id="np-cedula" class="form-control" inputmode="numeric" maxlength="10" placeholder="10 dígitos">
+            <span class="form-error-msg" id="error-np-cedula" hidden></span>
           </div>
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="np-nombres">Nombres</label>
               <input type="text" id="np-nombres" class="form-control">
+              <span class="form-error-msg" id="error-np-nombres" hidden></span>
             </div>
             <div class="form-group">
               <label class="form-label" for="np-apellidos">Apellidos</label>
               <input type="text" id="np-apellidos" class="form-control">
+              <span class="form-error-msg" id="error-np-apellidos" hidden></span>
             </div>
           </div>
           <div class="grid-2">
             <div class="form-group">
               <label class="form-label" for="np-fecha-nacimiento">Fecha de nacimiento</label>
               <input type="date" id="np-fecha-nacimiento" class="form-control">
+              <span class="form-error-msg" id="error-np-fecha_nacimiento" hidden></span>
             </div>
             <div class="form-group">
               <label class="form-label" for="np-sexo">Sexo</label>
@@ -135,11 +139,13 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="np-telefono">Teléfono (opcional)</label>
-            <input type="tel" id="np-telefono" class="form-control">
+            <input type="tel" id="np-telefono" class="form-control" inputmode="numeric" maxlength="10">
+            <span class="form-error-msg" id="error-np-telefono" hidden></span>
           </div>
           <div class="form-group">
             <label class="form-label" for="np-sector">Sector (opcional)</label>
             <input type="text" id="np-sector" class="form-control">
+            <span class="form-error-msg" id="error-np-sector" hidden></span>
           </div>
         </div>
 
@@ -172,7 +178,7 @@
       const selectTurno = document.getElementById('turno-brigada');
       const opciones = brigadasCache.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
       selectFiltro.insertAdjacentHTML('beforeend', opciones);
-      selectTurno.innerHTML = '<option value="">Selecciona una brigada</option>' + opciones;
+      selectTurno.innerHTML = '<option value="">Selecciona una campaña</option>' + opciones;
     }
     cargarTurnos();
 
@@ -279,16 +285,36 @@
   }
 
   // --- Modal: registrar turno ---
-  document.getElementById('turno-brigada').addEventListener('change', function () {
-    const brigada = brigadasCache.find(b => b.id === parseInt(this.value, 10));
+  // Los cupos "usados" cambian a cada rato (cada turno nuevo los mueve), así que no se
+  // puede confiar en brigadasCache (se cargó una sola vez al abrir la página): cada vez
+  // que se elige una brigada se piden los cupos reales y actualizados a la API.
+  async function pintarSelectEspecialidades(brigadaId) {
     const select = document.getElementById('turno-especialidad');
-    if (!brigada) {
-      select.innerHTML = '<option value="">Selecciona primero una brigada</option>';
+    if (!brigadaId) {
+      select.innerHTML = '<option value="">Selecciona primero una campaña</option>';
       return;
     }
-    select.innerHTML = (brigada.especialidades || [])
-      .map(e => `<option value="${e.id}">${e.nombre} (${e.cupos} cupos)</option>`).join('')
-      || '<option value="">Esta brigada no tiene especialidades</option>';
+
+    select.innerHTML = '<option value="">Cargando especialidades...</option>';
+    const resultado = await Api.get(`/brigadas/${brigadaId}`);
+    if (!resultado.ok) {
+      select.innerHTML = `<option value="">${resultado.message}</option>`;
+      return;
+    }
+
+    const especialidades = resultado.data.especialidades || [];
+    select.innerHTML = especialidades.map(e => {
+      const ocupados = e.cupos_ocupados ?? 0;
+      const disponibles = e.cupos - ocupados;
+      const etiqueta = disponibles > 0
+        ? `${e.nombre} (${disponibles} de ${e.cupos} cupos disponibles)`
+        : `${e.nombre} (cupo lleno: ${ocupados}/${e.cupos})`;
+      return `<option value="${e.id}">${etiqueta}</option>`;
+    }).join('') || '<option value="">Esta campaña no tiene especialidades</option>';
+  }
+
+  document.getElementById('turno-brigada').addEventListener('change', function () {
+    pintarSelectEspecialidades(this.value);
   });
 
   document.querySelectorAll('[data-modo-paciente]').forEach(btn => {
@@ -300,6 +326,20 @@
       document.getElementById('bloque-paciente-nuevo').style.display = esExistente ? 'none' : 'block';
       pacienteSeleccionadoId = null;
       document.getElementById('paciente-seleccionado-texto').textContent = '';
+    });
+  });
+
+  // Restricciones al escribir, para no depender solo del error del servidor:
+  // cédula y teléfono solo dígitos; nombres/apellidos solo letras (igual que valida el backend).
+  document.getElementById('np-cedula').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+  document.getElementById('np-telefono').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+  ['np-nombres', 'np-apellidos'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function () {
+      this.value = this.value.replace(/[^\p{L}\s.'-]/gu, '');
     });
   });
 
@@ -334,7 +374,7 @@
     const brigadaId = document.getElementById('turno-brigada').value;
     const especialidadId = document.getElementById('turno-especialidad').value;
     if (!brigadaId || !especialidadId) {
-      showToast('Selecciona brigada y especialidad.', 'error');
+      showToast('Selecciona campaña y especialidad.', 'error');
       return;
     }
 
@@ -359,6 +399,8 @@
       };
     }
 
+    document.querySelectorAll('#bloque-paciente-nuevo .form-error-msg').forEach(el => { el.hidden = true; el.textContent = ''; });
+
     const btn = document.getElementById('btn-registrar-turno');
     btn.disabled = true;
     btn.textContent = 'Registrando...';
@@ -369,6 +411,13 @@
     btn.textContent = 'Registrar turno';
 
     if (!resultado.ok) {
+      if (resultado.errors) {
+        Object.entries(resultado.errors).forEach(([campo, mensajes]) => {
+          // "paciente.cedula" -> #error-np-cedula
+          const el = document.getElementById(`error-np-${campo.replace('paciente.', '')}`);
+          if (el) { el.hidden = false; el.textContent = mensajes[0]; }
+        });
+      }
       showToast(resultado.message, 'error');
       return;
     }

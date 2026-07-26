@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('titulo', 'Brigadas')
+@section('titulo', 'Campañas')
 
 @section('content')
   <header class="page-header flex-between">
     <div>
-      <h1>Brigadas</h1>
+      <h1>Campañas</h1>
       <p class="page-subtitle">Campañas médicas comunitarias programadas</p>
     </div>
   </header>
 
-  <nav class="filter-bar" data-filter-group="brigadas" aria-label="Filtrar brigadas">
+  <nav class="filter-bar" data-filter-group="brigadas" aria-label="Filtrar campañas">
     <button class="filter-chip is-active" data-filter="all">Todas</button>
     <button class="filter-chip" data-filter="programada">Programadas</button>
     <button class="filter-chip" data-filter="en_curso">En curso</button>
@@ -33,7 +33,7 @@
 @section('modals')
   <div class="modal-overlay" id="modal-detalle">
     <div class="modal" role="dialog" aria-labelledby="modal-title">
-      <h2 class="modal-title" id="modal-title">Detalle de brigada</h2>
+      <h2 class="modal-title" id="modal-title">Detalle de campaña</h2>
       <div class="modal-body" id="modal-detalle-body">Cargando...</div>
       <div class="modal-actions">
         <button class="btn btn-primary" data-modal-close>Cerrar</button>
@@ -63,7 +63,7 @@
 
     brigadasCache = resultado.data;
     if (!brigadasCache.length) {
-      contenedor.innerHTML = `<div class="empty-state"><span class="material-symbols-rounded">event_busy</span><p>Todavía no hay brigadas registradas.</p></div>`;
+      contenedor.innerHTML = `<div class="empty-state"><span class="material-symbols-rounded">event_busy</span><p>Todavía no hay campañas registradas.</p></div>`;
       return;
     }
 

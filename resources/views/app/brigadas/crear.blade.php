@@ -8,14 +8,15 @@
       <span class="material-symbols-rounded">arrow_back</span> Volver
     </a>
     <h1>Nueva campaña</h1>
-    <p class="page-subtitle">Programa una nueva brigada médica comunitaria</p>
+    <p class="page-subtitle">Programa una nueva campaña médica comunitaria</p>
   </header>
 
   <div class="card" style="max-width:640px">
     <form id="form-brigada" novalidate>
       <div class="form-group">
         <label class="form-label" for="nombre">Nombre de la campaña</label>
-        <input type="text" id="nombre" class="form-control" placeholder="Ej. Jornada de salud Bastión Popular" required>
+        <input type="text" id="nombre" class="form-control" placeholder="Ej. Jornada de salud Bastión Popular" minlength="5" required>
+        <span class="form-error-msg" id="error-nombre" hidden></span>
       </div>
       <div class="form-group">
         <label class="form-label" for="descripcion">Descripción (opcional)</label>
@@ -24,10 +25,12 @@
       <div class="form-group">
         <label class="form-label" for="fecha">Fecha</label>
         <input type="date" id="fecha" class="form-control" required>
+        <span class="form-error-msg" id="error-fecha" hidden></span>
       </div>
       <div class="form-group">
         <label class="form-label" for="ubicacion">Ubicación</label>
-        <input type="text" id="ubicacion" class="form-control" placeholder="Sector, referencia o dirección" required>
+        <input type="text" id="ubicacion" class="form-control" placeholder="Sector, referencia o dirección" minlength="5" required>
+        <span class="form-error-msg" id="error-ubicacion" hidden></span>
       </div>
       <div class="form-group">
         <label class="form-label">Especialidades ofrecidas y cupos</label>
@@ -49,6 +52,19 @@
 <script>
   let especialidadesCatalogo = [];
   const seleccionadas = new Map(); // id especialidad -> cupos
+
+  // No se puede programar una campaña en el pasado ni demasiado lejos en el futuro.
+  document.getElementById('fecha').min = new Date().toISOString().slice(0, 10);
+  const fechaMaxima = new Date();
+  fechaMaxima.setFullYear(fechaMaxima.getFullYear() + 2);
+  document.getElementById('fecha').max = fechaMaxima.toISOString().slice(0, 10);
+
+  // Mismo set de caracteres que valida el backend: letras, números, espacios y . , # -
+  ['nombre', 'ubicacion'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function () {
+      this.value = this.value.replace(/[^\p{L}\d\s.,#-]/gu, '');
+    });
+  });
 
   async function cargarEspecialidades() {
     const resultado = await Api.get('/especialidades');
@@ -105,7 +121,7 @@
   document.getElementById('form-brigada').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    document.getElementById('error-especialidades').hidden = true;
+    document.querySelectorAll('#form-brigada .form-error-msg').forEach(el => { el.hidden = true; });
     if (!seleccionadas.size) {
       document.getElementById('error-especialidades').hidden = false;
       return;
@@ -127,6 +143,12 @@
     btn.textContent = 'Crear campaña';
 
     if (!resultado.ok) {
+      if (resultado.errors) {
+        Object.entries(resultado.errors).forEach(([campo, mensajes]) => {
+          const el = document.getElementById(`error-${campo}`);
+          if (el) { el.hidden = false; el.textContent = mensajes[0]; }
+        });
+      }
       showToast(resultado.message, 'error');
       return;
     }

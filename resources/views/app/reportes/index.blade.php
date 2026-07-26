@@ -6,10 +6,10 @@
   <header class="page-header flex-between">
     <div>
       <h1>Reportes</h1>
-      <p class="page-subtitle">Indicadores de atención de las brigadas médicas</p>
+      <p class="page-subtitle">Indicadores de atención de las campañas médicas</p>
     </div>
     <select class="form-control" id="filtro-brigada" style="max-width:280px">
-      <option value="">Todas las brigadas</option>
+      <option value="">Todas las campañas</option>
     </select>
   </header>
 
