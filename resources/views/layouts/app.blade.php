@@ -8,18 +8,18 @@
 </head>
 <body class="app-layout">
   @php
-      $dashboardUrl = safe_route('dashboard', '/dashboard');
-      $misCampanasUrl = safe_route('mis-campanas.index', '/mis-campanas');
-      $brigadasUrl = safe_route('brigadas.index', '/brigadas');
-      $solicitudesUrl = safe_route('solicitudes-brigada.index', '/solicitudes-brigada');
-      $pacientesUrl = safe_route('pacientes.index', '/pacientes');
-      $medicosUrl = safe_route('medicos.index', '/medicos');
-      $brigadistasUrl = safe_route('brigadistas.index', '/brigadistas');
-      $comunidadesUrl = safe_route('comunidades.index', '/comunidades');
-      $reportesUrl = safe_route('reportes.index', '/reportes');
-      $noticiasUrl = safe_route('noticias.index', '/noticias');
-      $usuariosUrl = safe_route('usuarios.index', '/usuarios');
-      $configuracionUrl = safe_route('configuracion.index', '/configuracion');
+      $dashboardUrl = Route::has('dashboard') ? route('dashboard') : url('/dashboard');
+      $misCampanasUrl = Route::has('mis-campanas.index') ? route('mis-campanas.index') : url('/mis-campanas');
+      $brigadasUrl = Route::has('brigadas.index') ? route('brigadas.index') : url('/brigadas');
+      $solicitudesUrl = Route::has('solicitudes-brigada.index') ? route('solicitudes-brigada.index') : url('/solicitudes-brigada');
+      $pacientesUrl = Route::has('pacientes.index') ? route('pacientes.index') : url('/pacientes');
+      $medicosUrl = Route::has('medicos.index') ? route('medicos.index') : url('/medicos');
+      $brigadistasUrl = Route::has('brigadistas.index') ? route('brigadistas.index') : url('/brigadistas');
+      $comunidadesUrl = Route::has('comunidades.index') ? route('comunidades.index') : url('/comunidades');
+      $reportesUrl = Route::has('reportes.index') ? route('reportes.index') : url('/reportes');
+      $noticiasUrl = Route::has('noticias.index') ? route('noticias.index') : url('/noticias');
+      $usuariosUrl = Route::has('usuarios.index') ? route('usuarios.index') : url('/usuarios');
+      $configuracionUrl = Route::has('configuracion.index') ? route('configuracion.index') : url('/configuracion');
   @endphp
 
   <aside class="sidebar" id="sidebar">
