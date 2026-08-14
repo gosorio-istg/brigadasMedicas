@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 </head>
 <body class="app-layout">
+  @php
+      $misCampanasUrl = Route::has('mis-campanas.index') ? route('mis-campanas.index') : url('/mis-campanas');
+  @endphp
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand"><span class="material-symbols-rounded">medical_services</span> BrigadaMedica</div>
     <nav class="sidebar-nav" aria-label="Navegación principal">
       <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
-      <a href="{{ route('mis-campanas.index') }}" data-ocultar-si-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">event_available</span> Mis campañas</a>
+      <a href="{{ $misCampanasUrl }}" data-ocultar-si-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">event_available</span> Mis campañas</a>
 
       {{-- Operación: todo lo que gira en torno a ejecutar una brigada, en el orden en que se usa. --}}
       <div class="sidebar-section" data-sidebar-section>
@@ -94,7 +97,7 @@
   <nav class="bottom-nav" aria-label="Navegación inferior">
     <a href="{{ route('dashboard') }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" aria-label="Inicio"><span class="material-symbols-rounded">home</span>Inicio</a>
     <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Campañas"><span class="material-symbols-rounded">groups</span>Campañas</a>
-    <a href="{{ route('mis-campanas.index') }}" data-ocultar-si-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}" aria-label="Mis campañas"><span class="material-symbols-rounded">event_available</span>Campañas</a>
+    <a href="{{ $misCampanasUrl }}" data-ocultar-si-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}" aria-label="Mis campañas"><span class="material-symbols-rounded">event_available</span>Campañas</a>
     <div class="bottom-nav-spacer" aria-hidden="true"></div>
     <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
     <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>
