@@ -37,6 +37,8 @@ class TurnoResource extends JsonResource
                 'id' => $this->registrador->id,
                 'name' => $this->registrador->name,
             ]),
+            'signos_vitales' => $this->whenLoaded('signosVitales', fn () => new SignosVitalesResource($this->signosVitales)),
+            'atencion' => $this->whenLoaded('atencion', fn () => new AtencionResource($this->atencion)),
             'created_at' => $this->created_at,
         ];
     }

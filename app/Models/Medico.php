@@ -12,7 +12,7 @@ class Medico extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombres', 'credencial_cmp', 'especialidad_id', 'telefono', 'disponible'];
+    protected $fillable = ['user_id', 'nombres', 'credencial_cmp', 'especialidad_id', 'telefono', 'disponible'];
 
     // Laravel 10 no soporta el método casts(): array (eso llegó en Laravel 11); debe ser esta propiedad.
     protected $casts = ['disponible' => 'boolean'];
@@ -20,6 +20,11 @@ class Medico extends Model
     public function especialidad(): BelongsTo
     {
         return $this->belongsTo(Especialidad::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function brigadas(): BelongsToMany

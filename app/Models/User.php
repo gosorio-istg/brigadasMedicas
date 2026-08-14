@@ -12,7 +12,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'web';
 
@@ -21,6 +21,10 @@ class User extends Authenticatable
         'apellido',
         'cedula',
         'email',
+        'firebase_uid',
+        'fecha_nacimiento',
+        'telefono',
+        'sector',
         'password',
         'activo',
     ];
@@ -35,6 +39,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'activo' => 'boolean',
+        'fecha_nacimiento' => 'date',
     ];
 
     // Brigadas en las que este usuario (brigadista) está asignado como parte del equipo.

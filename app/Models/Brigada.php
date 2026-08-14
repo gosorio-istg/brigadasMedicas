@@ -46,4 +46,9 @@ class Brigada extends Model
             ->withPivot(['rol_equipo', 'asistio'])
             ->withTimestamps();
     }
+
+    public function asistencias(): HasMany
+    {
+        return $this->hasMany(BrigadaAsistencia::class);
+    }
 }

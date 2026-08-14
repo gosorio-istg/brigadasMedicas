@@ -1,31 +1,35 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PermissionController;
-use App\Http\Controllers\Api\RoleController;
-use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\BrigadaAsistenciaController;
 use App\Http\Controllers\Api\BrigadaController;
-use App\Http\Controllers\Api\EspecialidadController;
-use App\Http\Controllers\Api\PacienteController;
-use App\Http\Controllers\Api\TurnoController;
-use App\Http\Controllers\Api\MedicoController;
-use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\ClinicalRecordController;
 use App\Http\Controllers\Api\ComunidadController;
+use App\Http\Controllers\Api\EspecialidadController;
+use App\Http\Controllers\Api\MedicoController;
 use App\Http\Controllers\Api\NoticiaController;
-use App\Http\Controllers\Api\SolicitudBrigadaController;
+use App\Http\Controllers\Api\PacienteController;
+use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\PreferenciaController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PublicContentController;
+use App\Http\Controllers\Api\ReporteController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SolicitudBrigadaController;
+use App\Http\Controllers\Api\TurnoController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /* Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 }); */
 
-
-
 Route::prefix('v1')->group(function () {
 
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/auth/firebase', [AuthController::class, 'firebase']);
+    Route::get('/public/brigadas', [PublicContentController::class, 'brigadas']);
+    Route::get('/public/noticias', [PublicContentController::class, 'noticias']);
 
     // Público: cualquier ciudadano puede pedir una brigada sin necesidad de una cuenta.
     Route::post('/solicitudes-brigada', [SolicitudBrigadaController::class, 'store']);
@@ -34,7 +38,12 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::get('/me/campanas', [BrigadaAsistenciaController::class, 'myCampaigns']);
         Route::put('/me', [AuthController::class, 'updateMe']);
+        Route::get('/me/disponibilidad-medica', [AuthController::class, 'medicalAvailability']);
+        Route::put('/me/disponibilidad-medica', [AuthController::class, 'updateMedicalAvailability']);
+        Route::get('/brigadas/{brigada}/mi-asistencia', [BrigadaAsistenciaController::class, 'show']);
+        Route::put('/brigadas/{brigada}/mi-asistencia', [BrigadaAsistenciaController::class, 'update']);
 
         // Preferencias propias del usuario autenticado: no requiere permiso especial.
         Route::get('/preferencias', [PreferenciaController::class, 'show']);
@@ -82,9 +91,12 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::middleware('permission:turnos.gestionar')->group(function () {
+            Route::get('/brigadas/{brigada}/asistencias', [BrigadaAsistenciaController::class, 'index']);
             Route::get('/turnos', [TurnoController::class, 'index']);
             Route::post('/turnos', [TurnoController::class, 'store']);
             Route::put('/turnos/{turno}', [TurnoController::class, 'update']);
+            Route::put('/turnos/{turno}/signos-vitales', [ClinicalRecordController::class, 'storeSignosVitales']);
+            Route::put('/turnos/{turno}/atencion', [ClinicalRecordController::class, 'storeAtencion']);
         });
 
         Route::middleware('permission:medicos.gestionar')->group(function () {
@@ -99,6 +111,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::middleware('permission:brigadistas.gestionar')->group(function () {
+            Route::get('/brigadistas', [UserController::class, 'brigadistas']);
             Route::get('/brigadas/{brigada}/brigadistas', [BrigadaController::class, 'brigadistas']);
             Route::post('/brigadas/{brigada}/brigadistas', [BrigadaController::class, 'asignarBrigadista']);
             Route::put('/brigadas/{brigada}/brigadistas/{user}', [BrigadaController::class, 'actualizarAsistenciaBrigadista']);

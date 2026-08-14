@@ -310,9 +310,13 @@
 
     const p = resultado.data;
     const historial = (p.turnos || []).map(t => `
-      <div class="detail-row">
-        <span>${formatearFecha(t.created_at)} — ${t.especialidad?.nombre ?? ''} (${t.brigada?.nombre ?? ''})</span>
-        <span class="chip ${estadoTurnoChipClass(t.estado)}">${estadoTurnoLabel(t.estado)}</span>
+      <div style="padding:12px 0;border-bottom:1px solid var(--color-border)">
+        <div class="detail-row">
+          <span>${formatearFecha(t.created_at)} — ${t.especialidad?.nombre ?? ''} (${t.brigada?.nombre ?? ''})</span>
+          <span class="chip ${estadoTurnoChipClass(t.estado)}">${estadoTurnoLabel(t.estado)}</span>
+        </div>
+        ${t.signos_vitales ? `<p class="page-subtitle">Signos: ${t.signos_vitales.presion_arterial} · ${t.signos_vitales.temperatura} °C · FC ${t.signos_vitales.frecuencia_cardiaca ?? '—'} · FR ${t.signos_vitales.frecuencia_respiratoria ?? '—'}</p>` : ''}
+        ${t.atencion ? `<p><strong>Diagnóstico:</strong> ${t.atencion.diagnostico}</p><p><strong>Receta:</strong> ${t.atencion.receta ?? 'Sin receta'}</p>${t.atencion.observaciones ? `<p><strong>Observaciones:</strong> ${t.atencion.observaciones}</p>` : ''}` : ''}
       </div>`).join('') || '<p class="page-subtitle">Sin turnos registrados todavía.</p>';
 
     cuerpo.innerHTML = `

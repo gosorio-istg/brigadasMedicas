@@ -21,6 +21,12 @@ class BrigadaResource extends JsonResource
                 'name' => $this->coordinador->name,
             ]),
             'especialidades' => $this->whenLoaded('especialidades', fn () => EspecialidadResource::collection($this->especialidades)),
+            'confirmaciones' => $this->when(isset($this->asistiran_count), fn () => [
+                'asistiran' => (int) $this->asistiran_count,
+                'tal_vez' => (int) $this->tal_vez_count,
+                'no_asistiran' => (int) $this->no_asistiran_count,
+                'total' => (int) $this->asistiran_count + (int) $this->tal_vez_count + (int) $this->no_asistiran_count,
+            ]),
             'created_at' => $this->created_at,
         ];
     }

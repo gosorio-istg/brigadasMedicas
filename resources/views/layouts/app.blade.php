@@ -12,11 +12,13 @@
     <div class="sidebar-brand"><span class="material-symbols-rounded">medical_services</span> BrigadaMedica</div>
     <nav class="sidebar-nav" aria-label="Navegación principal">
       <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
+      <a href="{{ route('mis-campanas.index') }}" data-ocultar-si-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">event_available</span> Mis campañas</a>
 
       {{-- Operación: todo lo que gira en torno a ejecutar una brigada, en el orden en que se usa. --}}
       <div class="sidebar-section" data-sidebar-section>
         <div class="sidebar-section-label">Operación</div>
         <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">groups</span> Campañas</a>
+        <a href="{{ route('solicitudes-brigada.index') }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('solicitudes-brigada.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">inbox</span> Solicitudes</a>
         <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="sidebar-link {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">personal_injury</span> Pacientes</a>
         <a href="{{ route('medicos.index') }}" data-requiere-permiso="medicos.gestionar" class="sidebar-link {{ request()->routeIs('medicos.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">stethoscope</span> Médicos</a>
         <a href="{{ route('brigadistas.index') }}" data-requiere-permiso="brigadistas.gestionar" class="sidebar-link {{ request()->routeIs('brigadistas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">volunteer_activism</span> Brigadistas</a>
@@ -92,6 +94,7 @@
   <nav class="bottom-nav" aria-label="Navegación inferior">
     <a href="{{ route('dashboard') }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" aria-label="Inicio"><span class="material-symbols-rounded">home</span>Inicio</a>
     <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Campañas"><span class="material-symbols-rounded">groups</span>Campañas</a>
+    <a href="{{ route('mis-campanas.index') }}" data-ocultar-si-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}" aria-label="Mis campañas"><span class="material-symbols-rounded">event_available</span>Campañas</a>
     <div class="bottom-nav-spacer" aria-hidden="true"></div>
     <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
     <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>

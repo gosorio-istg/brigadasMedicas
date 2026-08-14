@@ -82,6 +82,9 @@ function aplicarPermisosMenu() {
   document.querySelectorAll('[data-requiere-permiso]').forEach(el => {
     if (!hasPermission(el.dataset.requierePermiso)) el.style.display = 'none';
   });
+  document.querySelectorAll('[data-ocultar-si-permiso]').forEach(el => {
+    if (hasPermission(el.dataset.ocultarSiPermiso)) el.style.display = 'none';
+  });
 
   document.querySelectorAll('[data-sidebar-section]').forEach(seccion => {
     const quedaAlgunoVisible = [...seccion.querySelectorAll('.sidebar-link')]

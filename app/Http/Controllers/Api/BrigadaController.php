@@ -48,6 +48,11 @@ class BrigadaController extends Controller
     public function show(Brigada $brigada)
     {
         $brigada->load(['coordinador', 'especialidades']);
+        $brigada->loadCount([
+            'asistencias as asistiran_count' => fn ($query) => $query->where('estado', 'asistira'),
+            'asistencias as tal_vez_count' => fn ($query) => $query->where('estado', 'tal_vez'),
+            'asistencias as no_asistiran_count' => fn ($query) => $query->where('estado', 'no_asistira'),
+        ]);
 
         // Cupos "ocupados" = turnos ya registrados (no cancelados) para cada especialidad
         // de esta brigada. Se calcula aquí (no en el index, para no hacer N+1 sobre el

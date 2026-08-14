@@ -13,7 +13,15 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->paginate(15);
+        $users = User::with('roles')->orderByDesc('created_at')->paginate(15);
+
+        return UserResource::collection($users);
+    }
+
+    /** Lista únicamente las cuentas que pueden asignarse como brigadistas. */
+    public function brigadistas()
+    {
+        $users = User::role('Brigadista')->with('roles')->orderBy('name')->paginate(30);
 
         return UserResource::collection($users);
     }

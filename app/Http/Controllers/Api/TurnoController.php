@@ -10,6 +10,7 @@ use App\Models\Brigada;
 use App\Models\Especialidad;
 use App\Models\Paciente;
 use App\Models\Turno;
+use App\Services\SyncOutboxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class TurnoController extends Controller
 {
     public function index(Request $request)
     {
-        $turnos = Turno::with(['paciente', 'brigada', 'especialidad', 'registrador', 'medico'])
+        $turnos = Turno::with(['paciente', 'brigada', 'especialidad', 'registrador', 'medico', 'signosVitales', 'atencion'])
             ->when($request->filled('brigada_id'), fn ($q) => $q->where('brigada_id', $request->brigada_id))
             ->when($request->filled('especialidad_id'), fn ($q) => $q->where('especialidad_id', $request->especialidad_id))
             ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->estado))
@@ -28,7 +29,7 @@ class TurnoController extends Controller
         return TurnoResource::collection($turnos);
     }
 
-    public function store(StoreTurnoRequest $request)
+    public function store(StoreTurnoRequest $request, SyncOutboxService $sync)
     {
         $data = $request->validated();
 
@@ -60,13 +61,13 @@ class TurnoController extends Controller
 
         // lockForUpdate() bloquea las filas de turnos ya existentes de esta brigada+especialidad
         // mientras dura la transacción, evitando que dos registros simultáneos generen el mismo consecutivo.
-        $turno = DB::transaction(function () use ($brigada, $especialidad, $paciente) {
+        $turno = DB::transaction(function () use ($brigada, $especialidad, $paciente, $sync) {
             $consecutivo = Turno::where('brigada_id', $brigada->id)
                 ->where('especialidad_id', $especialidad->id)
                 ->lockForUpdate()
                 ->count() + 1;
 
-            return Turno::create([
+            $turno = Turno::create([
                 'brigada_id' => $brigada->id,
                 'paciente_id' => $paciente->id,
                 'especialidad_id' => $especialidad->id,
@@ -75,6 +76,9 @@ class TurnoController extends Controller
                 'registrado_por' => Auth::id(),
                 'hora_registro' => now(),
             ]);
+            $sync->queue('turnos_realtime', $turno->id, $this->turnoRealtimePayload($turno));
+
+            return $turno;
         });
 
         $resource = new TurnoResource($turno->load(['paciente', 'brigada', 'especialidad', 'registrador', 'medico']));
@@ -94,7 +98,7 @@ class TurnoController extends Controller
         return $resource;
     }
 
-    public function update(UpdateTurnoRequest $request, Turno $turno)
+    public function update(UpdateTurnoRequest $request, Turno $turno, SyncOutboxService $sync)
     {
         $data = $request->validated();
 
@@ -106,6 +110,7 @@ class TurnoController extends Controller
             $turno->medico_id = $data['medico_id'];
         }
         $turno->save();
+        $sync->queue('turnos_realtime', $turno->id, $this->turnoRealtimePayload($turno));
 
         return new TurnoResource($turno->load(['paciente', 'brigada', 'especialidad', 'registrador', 'medico']));
     }
@@ -119,6 +124,18 @@ class TurnoController extends Controller
             ? mb_substr(collect($palabras)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode(''), 0, 3)
             : mb_strtoupper(mb_substr($palabras[0], 0, 3));
 
-        return $prefijo . '-' . str_pad((string) $consecutivo, 3, '0', STR_PAD_LEFT);
+        return $prefijo.'-'.str_pad((string) $consecutivo, 3, '0', STR_PAD_LEFT);
+    }
+
+    private function turnoRealtimePayload(Turno $turno): array
+    {
+        return [
+            'turno_id' => $turno->id,
+            'numero_turno' => $turno->numero_turno,
+            'estado' => $turno->estado,
+            'brigada_id' => $turno->brigada_id,
+            'especialidad_id' => $turno->especialidad_id,
+            'updated_at' => now()->toIso8601String(),
+        ];
     }
 }

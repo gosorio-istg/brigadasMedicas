@@ -87,6 +87,7 @@
       <div class="detail-row"><span class="detail-label">Fecha</span><span>${formatearFecha(b.fecha)}</span></div>
       <div class="detail-row"><span class="detail-label">Ubicación</span><span>${b.ubicacion}</span></div>
       <div class="detail-row"><span class="detail-label">Coordinador</span><span>${b.coordinador?.name ?? '—'}</span></div>
+      <div class="detail-row"><span class="detail-label">Confirmaciones desde la app</span><span><strong>${b.confirmaciones?.asistiran ?? 0}</strong> asistirán · ${b.confirmaciones?.tal_vez ?? 0} tal vez · ${b.confirmaciones?.no_asistiran ?? 0} no asistirán</span></div>
       ${b.descripcion ? `<div class="detail-row"><span class="detail-label">Descripción</span><span>${b.descripcion}</span></div>` : ''}
       <h3 style="font-size:var(--font-size-small);margin:var(--space-md) 0 var(--space-sm)">Especialidades</h3>
       <p style="font-size:var(--font-size-small);color:var(--color-text-muted)">${especialidades}</p>`;

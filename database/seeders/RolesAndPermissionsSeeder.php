@@ -55,6 +55,18 @@ class RolesAndPermissionsSeeder extends Seeder
             'turnos.gestionar',
         ]);
 
+        // Médico: consulta su operación asignada y completa el flujo clínico de turnos.
+        $medico = Role::firstOrCreate(['name' => 'Medico', 'guard_name' => 'web']);
+        $medico->syncPermissions([
+            'pacientes.gestionar',
+            'turnos.gestionar',
+        ]);
+
+        // Ciudadano: usa únicamente endpoints públicos y de autoservicio (/me y preferencias).
+        // No recibe permisos administrativos.
+        $ciudadano = Role::firstOrCreate(['name' => 'Ciudadano', 'guard_name' => 'web']);
+        $ciudadano->syncPermissions([]);
+
         $admin = User::firstOrCreate(
             ['email' => 'coordinador@brigadasalud.test'],
             [

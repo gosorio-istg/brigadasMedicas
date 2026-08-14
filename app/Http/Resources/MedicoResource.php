@@ -11,6 +11,7 @@ class MedicoResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
             'nombres' => $this->nombres,
             'credencial_cmp' => $this->credencial_cmp,
             'telefono' => $this->telefono,

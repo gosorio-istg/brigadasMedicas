@@ -24,10 +24,12 @@ Route::view('/recuperar-password', 'auth.recuperar-password')->name('password.re
 Route::view('/seleccion-rol', 'auth.seleccion-rol')->name('seleccion-rol');
 
 Route::view('/dashboard', 'app.dashboard')->name('dashboard');
+Route::view('/mis-campanas', 'app.mis-campanas.index')->name('mis-campanas.index');
 
 Route::view('/brigadas', 'app.brigadas.index')->name('brigadas.index');
 Route::view('/brigadas/nueva', 'app.brigadas.crear')->name('brigadas.crear');
 Route::view('/brigadas/{id}', 'app.brigadas.detalle')->name('brigadas.detalle');
+Route::view('/solicitudes-brigada', 'app.solicitudes-brigada.index')->name('solicitudes-brigada.index');
 
 Route::view('/pacientes', 'app.pacientes.index')->name('pacientes.index');
 

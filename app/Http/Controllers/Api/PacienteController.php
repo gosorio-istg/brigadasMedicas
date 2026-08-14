@@ -37,7 +37,9 @@ class PacienteController extends Controller
 
     public function show(Paciente $paciente)
     {
-        return new PacienteResource($paciente->load(['turnos.brigada', 'turnos.especialidad']));
+        return new PacienteResource($paciente->load([
+            'turnos.brigada', 'turnos.especialidad', 'turnos.signosVitales', 'turnos.atencion',
+        ]));
     }
 
     public function update(UpdatePacienteRequest $request, Paciente $paciente)

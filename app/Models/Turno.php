@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Turno extends Model
 {
@@ -52,5 +53,15 @@ class Turno extends Model
     public function medico(): BelongsTo
     {
         return $this->belongsTo(Medico::class);
+    }
+
+    public function signosVitales(): HasOne
+    {
+        return $this->hasOne(SignosVitales::class);
+    }
+
+    public function atencion(): HasOne
+    {
+        return $this->hasOne(Atencion::class);
     }
 }
