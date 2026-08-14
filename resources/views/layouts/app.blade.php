@@ -8,38 +8,49 @@
 </head>
 <body class="app-layout">
   @php
-      $misCampanasUrl = Route::has('mis-campanas.index') ? route('mis-campanas.index') : url('/mis-campanas');
+      $dashboardUrl = safe_route('dashboard', '/dashboard');
+      $misCampanasUrl = safe_route('mis-campanas.index', '/mis-campanas');
+      $brigadasUrl = safe_route('brigadas.index', '/brigadas');
+      $solicitudesUrl = safe_route('solicitudes-brigada.index', '/solicitudes-brigada');
+      $pacientesUrl = safe_route('pacientes.index', '/pacientes');
+      $medicosUrl = safe_route('medicos.index', '/medicos');
+      $brigadistasUrl = safe_route('brigadistas.index', '/brigadistas');
+      $comunidadesUrl = safe_route('comunidades.index', '/comunidades');
+      $reportesUrl = safe_route('reportes.index', '/reportes');
+      $noticiasUrl = safe_route('noticias.index', '/noticias');
+      $usuariosUrl = safe_route('usuarios.index', '/usuarios');
+      $configuracionUrl = safe_route('configuracion.index', '/configuracion');
   @endphp
 
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand"><span class="material-symbols-rounded">medical_services</span> BrigadaMedica</div>
     <nav class="sidebar-nav" aria-label="Navegación principal">
-      <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
+      <a href="{{ $dashboardUrl }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
       <a href="{{ $misCampanasUrl }}" data-ocultar-si-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">event_available</span> Mis campañas</a>
 
       {{-- Operación: todo lo que gira en torno a ejecutar una brigada, en el orden en que se usa. --}}
       <div class="sidebar-section" data-sidebar-section>
         <div class="sidebar-section-label">Operación</div>
-        <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">groups</span> Campañas</a>
-        <a href="{{ route('solicitudes-brigada.index') }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('solicitudes-brigada.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">inbox</span> Solicitudes</a>
-        <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="sidebar-link {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">personal_injury</span> Pacientes</a>
-        <a href="{{ route('medicos.index') }}" data-requiere-permiso="medicos.gestionar" class="sidebar-link {{ request()->routeIs('medicos.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">stethoscope</span> Médicos</a>
-        <a href="{{ route('brigadistas.index') }}" data-requiere-permiso="brigadistas.gestionar" class="sidebar-link {{ request()->routeIs('brigadistas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">volunteer_activism</span> Brigadistas</a>
-        <a href="{{ route('comunidades.index') }}" data-requiere-permiso="comunidades.gestionar" class="sidebar-link {{ request()->routeIs('comunidades.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">location_city</span> Comunidades</a>
+        <a href="{{ $brigadasUrl }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">groups</span> Campañas</a>
+        <a href="{{ $solicitudesUrl }}" data-requiere-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('solicitudes-brigada.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">inbox</span> Solicitudes</a>
+        <a href="{{ $pacientesUrl }}" data-requiere-permiso="pacientes.gestionar" class="sidebar-link {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">personal_injury</span> Pacientes</a>
+        <a href="{{ $medicosUrl }}" data-requiere-permiso="medicos.gestionar" class="sidebar-link {{ request()->routeIs('medicos.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">stethoscope</span> Médicos</a>
+        <a href="{{ $brigadistasUrl }}" data-requiere-permiso="brigadistas.gestionar" class="sidebar-link {{ request()->routeIs('brigadistas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">volunteer_activism</span> Brigadistas</a>
+        <a href="{{ $comunidadesUrl }}" data-requiere-permiso="comunidades.gestionar" class="sidebar-link {{ request()->routeIs('comunidades.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">location_city</span> Comunidades</a>
       </div>
 
       {{-- Análisis y comunicación: se consultan una vez que ya hay operación registrada. --}}
       <div class="sidebar-section" data-sidebar-section>
         <div class="sidebar-section-label">Análisis</div>
-        <a href="{{ route('reportes.index') }}" data-requiere-permiso="reportes.ver" class="sidebar-link {{ request()->routeIs('reportes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">bar_chart</span> Reportes</a>
-        <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="sidebar-link {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">newspaper</span> Noticias</a>
+        <a href="{{ $reportesUrl }}" data-requiere-permiso="reportes.ver" class="sidebar-link {{ request()->routeIs('reportes.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">bar_chart</span> Reportes</a>
+        <a href="{{ $noticiasUrl }}" data-requiere-permiso="noticias.gestionar" class="sidebar-link {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">newspaper</span> Noticias</a>
       </div>
 
       {{-- Administración: quién entra al sistema y cómo está configurado. --}}
       <div class="sidebar-section" data-sidebar-section>
         <div class="sidebar-section-label">Administración</div>
-        <a href="{{ route('usuarios.index') }}" data-requiere-permiso="usuarios.ver" class="sidebar-link {{ request()->routeIs('usuarios.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">manage_accounts</span> Usuarios</a>
-        <a href="{{ route('configuracion.index') }}" class="sidebar-link {{ request()->routeIs('configuracion.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">settings</span> Configuración</a>
+        <a href="{{ $usuariosUrl }}" data-requiere-permiso="usuarios.ver" class="sidebar-link {{ request()->routeIs('usuarios.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">manage_accounts</span> Usuarios</a>
+        <a href="{{ $configuracionUrl }}" class="sidebar-link {{ request()->routeIs('configuracion.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">settings</span> Configuración</a>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -77,7 +88,7 @@
               </div>
             </div>
             <div class="user-menu-divider"></div>
-            <a href="{{ route('configuracion.index') }}" class="user-menu-item">
+            <a href="{{ $configuracionUrl }}" class="user-menu-item">
               <span class="material-symbols-rounded">person</span> Ver mi perfil
             </a>
             <div class="user-menu-divider"></div>
@@ -95,12 +106,12 @@
   </div>
 
   <nav class="bottom-nav" aria-label="Navegación inferior">
-    <a href="{{ route('dashboard') }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" aria-label="Inicio"><span class="material-symbols-rounded">home</span>Inicio</a>
-    <a href="{{ route('brigadas.index') }}" data-requiere-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Campañas"><span class="material-symbols-rounded">groups</span>Campañas</a>
+    <a href="{{ $dashboardUrl }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" aria-label="Inicio"><span class="material-symbols-rounded">home</span>Inicio</a>
+    <a href="{{ $brigadasUrl }}" data-requiere-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('brigadas.*') ? 'is-active' : '' }}" aria-label="Campañas"><span class="material-symbols-rounded">groups</span>Campañas</a>
     <a href="{{ $misCampanasUrl }}" data-ocultar-si-permiso="brigadas.gestionar" class="bottom-nav-item {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}" aria-label="Mis campañas"><span class="material-symbols-rounded">event_available</span>Campañas</a>
     <div class="bottom-nav-spacer" aria-hidden="true"></div>
-    <a href="{{ route('pacientes.index') }}" data-requiere-permiso="pacientes.gestionar" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
-    <a href="{{ route('noticias.index') }}" data-requiere-permiso="noticias.gestionar" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>
+    <a href="{{ $pacientesUrl }}" data-requiere-permiso="pacientes.gestionar" class="bottom-nav-item {{ request()->routeIs('pacientes.*') ? 'is-active' : '' }}" aria-label="Pacientes"><span class="material-symbols-rounded">personal_injury</span>Pacientes</a>
+    <a href="{{ $noticiasUrl }}" data-requiere-permiso="noticias.gestionar" class="bottom-nav-item {{ request()->routeIs('noticias.*') ? 'is-active' : '' }}" aria-label="Notificaciones"><span class="material-symbols-rounded">notifications</span>Alertas</a>
 
     <button class="bottom-nav-menu-btn" id="sidebar-toggle" aria-label="Abrir menú completo">
       <span class="material-symbols-rounded">menu</span>
