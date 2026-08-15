@@ -5,7 +5,7 @@
 @section('content')
   <header class="auth-header">
     <div class="auth-brand">
-      <span class="material-symbols-rounded">medical_services</span>
+      <img src="{{ asset('images/logo_brigada.jpeg') }}" alt="Logo BrigadaMedica" class="auth-brand-logo">
       <span class="auth-brand-name">BrigadaMedica</span>
     </div>
     <h1 class="auth-title">Iniciar sesión</h1>

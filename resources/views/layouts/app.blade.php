@@ -23,7 +23,10 @@
   @endphp
 
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand"><span class="material-symbols-rounded">medical_services</span> BrigadaMedica</div>
+    <div class="sidebar-brand">
+      <img src="{{ asset('images/logo_brigada.jpeg') }}" alt="Logo BrigadaMedica" class="sidebar-brand-logo">
+      <span>BrigadaMedica</span>
+    </div>
     <nav class="sidebar-nav" aria-label="Navegación principal">
       <a href="{{ $dashboardUrl }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}"><span class="material-symbols-rounded">home</span> Dashboard</a>
       <a href="{{ $misCampanasUrl }}" data-ocultar-si-permiso="brigadas.gestionar" class="sidebar-link {{ request()->routeIs('mis-campanas.*') ? 'is-active' : '' }}"><span class="material-symbols-rounded">event_available</span> Mis campañas</a>

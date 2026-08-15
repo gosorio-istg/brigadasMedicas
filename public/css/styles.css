@@ -143,6 +143,15 @@ a:hover { color: var(--color-primary-hover); }
   font-size: var(--font-size-h4);
 }
 
+.sidebar-brand-logo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.12);
+}
+
 .sidebar-brand .material-symbols-rounded {
   font-size: 28px;
   color: var(--color-secondary);
@@ -1389,6 +1398,16 @@ select.form-control {
   gap: var(--space-sm);
   color: var(--color-primary);
   margin-bottom: var(--space-md);
+}
+
+.auth-brand-logo,
+.sidebar-brand-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.18);
+  background: rgba(255,255,255,0.7);
 }
 
 .auth-brand .material-symbols-rounded { font-size: 40px; color: var(--color-secondary); }
