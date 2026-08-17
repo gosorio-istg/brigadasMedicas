@@ -41,6 +41,31 @@
           Disponible para atender turnos
         </label>
       </div>
+
+      <div id="grupo-cuenta-acceso">
+        <h3 style="font-size:var(--font-size-small);margin:var(--space-lg) 0 var(--space-sm)">Cuenta de acceso a la app</h3>
+        <p class="page-subtitle" style="margin-bottom:var(--space-sm)">Con estos datos el médico podrá iniciar sesión en la app móvil.</p>
+        <div class="form-group">
+          <label class="form-label" for="apellido">Apellidos</label>
+          <input type="text" id="apellido" class="form-control" placeholder="Ej. Mendoza Ruiz" autocapitalize="words" required>
+          <span class="form-error-msg" id="error-apellido" hidden></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cedula">Cédula</label>
+          <input type="text" id="cedula" class="form-control" inputmode="numeric" maxlength="10" placeholder="10 dígitos" required>
+          <span class="form-error-msg" id="error-cedula" hidden></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Correo electrónico</label>
+          <input type="email" id="email" class="form-control" placeholder="medico@correo.com" required>
+          <span class="form-error-msg" id="error-email" hidden></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Contraseña temporal</label>
+          <input type="text" id="password" class="form-control" placeholder="Mínimo 8 caracteres" minlength="8" required>
+          <span class="form-error-msg" id="error-password" hidden></span>
+        </div>
+      </div>
       <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
         <a href="{{ route('medicos.index') }}" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary" id="btn-guardar">{{ isset($id) ? 'Guardar cambios' : 'Registrar médico' }}</button>
@@ -70,6 +95,10 @@
     this.value = digitos ? `CMP-${digitos}` : '';
   });
 
+  document.getElementById('cedula').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+  });
+
   function limpiarErrores() {
     document.querySelectorAll('.form-error-msg').forEach(el => { el.hidden = true; el.textContent = ''; });
   }
@@ -94,6 +123,10 @@
       activas.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
     if (seleccionActual) select.value = seleccionActual;
   }
+
+  // Editar un médico no toca su cuenta de acceso (eso se hace desde "Usuarios"),
+  // así que ese bloque solo tiene sentido al crear uno nuevo.
+  if (medicoId) document.getElementById('grupo-cuenta-acceso').style.display = 'none';
 
   async function cargarMedico() {
     if (!medicoId) {
@@ -125,6 +158,13 @@
       telefono: document.getElementById('telefono').value.trim() || null,
       disponible: document.getElementById('disponible').checked,
     };
+
+    if (!medicoId) {
+      cuerpo.apellido = document.getElementById('apellido').value.trim();
+      cuerpo.cedula = document.getElementById('cedula').value.trim();
+      cuerpo.email = document.getElementById('email').value.trim();
+      cuerpo.password = document.getElementById('password').value;
+    }
 
     const btn = document.getElementById('btn-guardar');
     btn.disabled = true;

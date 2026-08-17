@@ -23,7 +23,7 @@ class PacienteController extends Controller
                 });
             })
             ->orderBy('apellidos')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         return PacienteResource::collection($pacientes);
     }

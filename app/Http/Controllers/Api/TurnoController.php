@@ -24,7 +24,7 @@ class TurnoController extends Controller
             ->when($request->filled('especialidad_id'), fn ($q) => $q->where('especialidad_id', $request->especialidad_id))
             ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->estado))
             ->orderBy('hora_registro')
-            ->paginate(20);
+            ->paginate($this->perPage($request, 20));
 
         return TurnoResource::collection($turnos);
     }

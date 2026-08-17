@@ -7,21 +7,22 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->orderByDesc('created_at')->paginate(15);
+        $users = User::with('roles')->orderByDesc('created_at')->paginate($this->perPage($request));
 
         return UserResource::collection($users);
     }
 
     /** Lista únicamente las cuentas que pueden asignarse como brigadistas. */
-    public function brigadistas()
+    public function brigadistas(Request $request)
     {
-        $users = User::role('Brigadista')->with('roles')->orderBy('name')->paginate(30);
+        $users = User::role('Brigadista')->with('roles')->orderBy('name')->paginate($this->perPage($request, 30));
 
         return UserResource::collection($users);
     }
@@ -48,7 +49,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        return new UserResource($user->load('roles.permissions'));
+        return new UserResource($user->load(['roles.permissions', 'permissions']));
     }
 
     public function update(UpdateUserRequest $request, User $user)

@@ -7,15 +7,16 @@ use App\Http\Requests\StoreNoticiaRequest;
 use App\Http\Requests\UpdateNoticiaRequest;
 use App\Http\Resources\NoticiaResource;
 use App\Models\Noticia;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NoticiaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $noticias = Noticia::with('autor')
             ->orderByDesc('fecha_publicacion')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         return NoticiaResource::collection($noticias);
     }

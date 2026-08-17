@@ -26,7 +26,7 @@ class SolicitudBrigadaController extends Controller
         $solicitudes = SolicitudBrigada::with(['brigada', 'gestionadoPor'])
             ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->estado))
             ->orderByDesc('created_at')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         return SolicitudBrigadaResource::collection($solicitudes);
     }

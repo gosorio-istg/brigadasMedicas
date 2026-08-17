@@ -20,7 +20,7 @@ class BrigadaAsistenciaController extends Controller
         ])
             ->whereIn('estado', ['programada', 'en_curso'])
             ->orderByDesc('fecha')
-            ->paginate(30);
+            ->paginate($this->perPage($request, 30));
 
         return CitizenCampaignResource::collection($campaigns);
     }

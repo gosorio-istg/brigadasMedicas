@@ -7,12 +7,13 @@ use App\Http\Requests\StoreComunidadRequest;
 use App\Http\Requests\UpdateComunidadRequest;
 use App\Http\Resources\ComunidadResource;
 use App\Models\Comunidad;
+use Illuminate\Http\Request;
 
 class ComunidadController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return ComunidadResource::collection(Comunidad::orderBy('nombre')->paginate(15));
+        return ComunidadResource::collection(Comunidad::orderBy('nombre')->paginate($this->perPage($request)));
     }
 
     public function store(StoreComunidadRequest $request)

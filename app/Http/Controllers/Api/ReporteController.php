@@ -19,11 +19,13 @@ class ReporteController extends Controller
         $totalAtendidos = (clone $query)->where('estado', 'atendido')->count();
 
         // Minutos promedio entre hora_registro y hora_atencion, solo turnos ya atendidos.
+        // Se agrega en SQL (en vez de traer cada turno a PHP y promediar ahí) para que esto
+        // siga siendo rápido cuando la tabla turnos crezca a miles de filas.
         $tiempoPromedioMinutos = (clone $query)
             ->where('estado', 'atendido')
             ->whereNotNull('hora_atencion')
-            ->get(['hora_registro', 'hora_atencion'])
-            ->avg(fn ($turno) => $turno->hora_registro->diffInMinutes($turno->hora_atencion));
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, hora_registro, hora_atencion)) as promedio')
+            ->value('promedio');
 
         $desglose = (clone $query)
             ->join('especialidades', 'especialidades.id', '=', 'turnos.especialidad_id')

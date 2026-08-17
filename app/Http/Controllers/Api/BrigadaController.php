@@ -14,15 +14,16 @@ use App\Http\Resources\MedicoResource;
 use App\Models\Brigada;
 use App\Models\Turno;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class BrigadaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $brigadas = Brigada::with(['coordinador', 'especialidades'])
             ->orderByDesc('fecha')
-            ->paginate(15);
+            ->paginate($this->perPage($request));
 
         return BrigadaResource::collection($brigadas);
     }

@@ -34,11 +34,17 @@ class AuthController extends Controller
             return response()->json(['message' => 'Firebase no está configurado en el servidor.'], 503);
         }
 
-        $firebaseResponse = Http::asJson()
-            ->timeout(15)
-            ->post("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={$apiKey}", [
-                'idToken' => $data['id_token'],
-            ]);
+        try {
+            $firebaseResponse = Http::asJson()
+                ->timeout(8)
+                ->retry(1, 200)
+                ->post("https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={$apiKey}", [
+                    'idToken' => $data['id_token'],
+                ]);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Firebase caído/inalcanzable: no dejar que esto cuelgue el worker ni devuelva un 500 crudo.
+            return response()->json(['message' => 'No se pudo verificar la sesión de Firebase. Intenta de nuevo.'], 503);
+        }
 
         $firebaseUser = $firebaseResponse->json('users.0');
         if (! $firebaseResponse->successful() || ! $firebaseUser || empty($firebaseUser['localId']) || empty($firebaseUser['email'])) {
@@ -82,7 +88,7 @@ class AuthController extends Controller
         $token = $user->createToken('brigadasalud-android')->plainTextToken;
 
         return response()->json([
-            'user' => new UserResource($user->load('roles.permissions')),
+            'user' => new UserResource($user->load(['roles.permissions', 'permissions'])),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -112,7 +118,7 @@ class AuthController extends Controller
         $token = $user->createToken('brigadamedica-token')->plainTextToken;
 
         return response()->json([
-            'user' => new UserResource($user->load('roles.permissions')),
+            'user' => new UserResource($user->load(['roles.permissions', 'permissions'])),
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
@@ -120,7 +126,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user()->load('roles.permissions'));
+        return new UserResource($request->user()->load(['roles.permissions', 'permissions']));
     }
 
     // Autoservicio: cualquier usuario autenticado puede editar sus propios datos,
@@ -154,7 +160,7 @@ class AuthController extends Controller
         }
         $user->save();
 
-        return new UserResource($user->load('roles.permissions'));
+        return new UserResource($user->load(['roles.permissions', 'permissions']));
     }
 
     public function updateMedicalAvailability(Request $request)

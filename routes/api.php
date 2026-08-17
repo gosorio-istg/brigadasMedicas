@@ -26,8 +26,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/auth/firebase', [AuthController::class, 'firebase']);
+    // Limita intentos repetidos: cada request de login espera hasta al backend de
+    // Firebase, así que sin este límite unos pocos intentos fallidos seguidos pueden
+    // agotar los workers de PHP-FPM y volver lento todo lo demás.
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/auth/firebase', [AuthController::class, 'firebase'])->middleware('throttle:10,1');
     Route::get('/public/brigadas', [PublicContentController::class, 'brigadas']);
     Route::get('/public/noticias', [PublicContentController::class, 'noticias']);
 
