@@ -61,7 +61,7 @@
     </div>
   </section>
 
-  @if(app()->environment('local'))
+  {{-- @if(app()->environment('local')) --}}
   <section class="section-block" id="seccion-demo">
     <h2 class="section-title">Zona de desarrollo</h2>
     <div class="card" style="max-width:560px;border-color:var(--color-error)">
@@ -76,7 +76,7 @@
       <div id="resultado-demo" style="margin-top:var(--space-md);display:none"></div>
     </div>
   </section>
-  @endif
+{{--   @endif --}}
 
   <section class="section-block">
     <h2 class="section-title">Preferencias de notificación</h2>
@@ -98,7 +98,7 @@
 @endsection
 
 @section('modals')
-  @if(app()->environment('local'))
+  {{-- @if(app()->environment('local')) --}}
   <div class="modal-overlay" id="modal-reset-demo">
     <div class="modal" role="dialog">
       <h2 class="modal-title">Reiniciar datos de demostración</h2>
@@ -113,7 +113,7 @@
       </div>
     </div>
   </div>
-  @endif
+{{--   @endif --}}
 @endsection
 
 @section('scripts')
