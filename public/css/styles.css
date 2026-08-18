@@ -1896,6 +1896,28 @@ select.form-control {
 }
 
 /* ==========================================
+   CHART CARDS (dashboard, Chart.js) — el contenedor fija una altura porque los canvas de
+   Chart.js con responsive:true necesitan un padre con altura explícita, si no crecen sin
+   límite en cada redibujado.
+   ========================================== */
+.chart-card-canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+
+.chart-card-canvas-wrap--sm { height: 200px; }
+
+.chart-card-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+  text-align: center;
+}
+
+/* ==========================================
    MEDIA QUERIES SUMMARY
    ========================================== */
 /* Mobile: default styles */

@@ -23,6 +23,8 @@ class ReporteResumenResource extends JsonResource
                 'total' => (int) $fila->total,
                 'atendidos' => (int) $fila->atendidos,
             ])->values(),
+            'desglose_por_estado' => $this->resource['desglose_por_estado'],
+            'tendencia_semanal' => $this->resource['tendencia_semanal'],
         ];
     }
 }

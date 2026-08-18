@@ -36,6 +36,17 @@ class DemoDataSeeder extends Seeder
         $this->sembrarSolicitudesBrigada($brigadas);
     }
 
+    // Busca por email O cédula antes de crear: firstOrCreate() solo compara por el atributo
+    // que se le pasa (aquí, email), así que si ya existe OTRO usuario con la misma cédula
+    // (de una siembra parcial anterior, o creado a mano desde la web) el INSERT choca contra
+    // la restricción UNIQUE de "cedula" y aborta todo el seeder a mitad de camino.
+    private function resolveUsuario(string $email, string $cedula, array $atributos): User
+    {
+        $usuario = User::where('email', $email)->orWhere('cedula', $cedula)->first();
+
+        return $usuario ?: User::create(array_merge(['email' => $email, 'cedula' => $cedula], $atributos));
+    }
+
     // Cuentas de Ciudadano: para probar registro/login desde la app móvil, solicitar
     // campañas y confirmar asistencia (ninguna de las otras siembras crea este rol).
     private function sembrarCiudadanos(): void
@@ -46,17 +57,13 @@ class DemoDataSeeder extends Seeder
         ];
 
         foreach ($datos as $dato) {
-            $usuario = User::firstOrCreate(
-                ['email' => $dato['email']],
-                [
-                    'name' => $dato['name'],
-                    'apellido' => $dato['apellido'],
-                    'cedula' => $dato['cedula'],
-                    'sector' => $dato['sector'],
-                    'password' => Hash::make('123'),
-                    'activo' => true,
-                ]
-            );
+            $usuario = $this->resolveUsuario($dato['email'], $dato['cedula'], [
+                'name' => $dato['name'],
+                'apellido' => $dato['apellido'],
+                'sector' => $dato['sector'],
+                'password' => Hash::make('123'),
+                'activo' => true,
+            ]);
             $usuario->syncRoles(['Ciudadano']);
         }
     }
@@ -84,10 +91,9 @@ class DemoDataSeeder extends Seeder
 
         $usuarios = [];
         foreach ($datos as $dato) {
-            $usuario = User::firstOrCreate(
-                ['email' => $dato['email']],
-                ['name' => $dato['name'], 'cedula' => $dato['cedula'], 'password' => Hash::make('123'), 'activo' => true]
-            );
+            $usuario = $this->resolveUsuario($dato['email'], $dato['cedula'], [
+                'name' => $dato['name'], 'password' => Hash::make('123'), 'activo' => true,
+            ]);
             $usuario->assignRole($dato['rol']);
             $usuarios[$dato['email']] = $usuario;
         }
@@ -113,16 +119,12 @@ class DemoDataSeeder extends Seeder
         foreach ($datos as $dato) {
             // Cuenta de acceso propia (rol Medico) para poder entrar desde la app móvil,
             // igual que hace MedicoController::store al crear un médico desde la web.
-            $usuario = User::firstOrCreate(
-                ['email' => $dato['email']],
-                [
-                    'name' => $dato['nombres'],
-                    'apellido' => $dato['apellido'],
-                    'cedula' => $dato['cedula'],
-                    'password' => Hash::make('123'),
-                    'activo' => true,
-                ]
-            );
+            $usuario = $this->resolveUsuario($dato['email'], $dato['cedula'], [
+                'name' => $dato['nombres'],
+                'apellido' => $dato['apellido'],
+                'password' => Hash::make('123'),
+                'activo' => true,
+            ]);
             $usuario->syncRoles(['Medico']);
 
             $medicos[$dato['credencial_cmp']] = Medico::firstOrCreate(
@@ -142,7 +144,7 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarBrigadas(array $especialidades, array $usuarios, array $medicos): array
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
         $coordinadorSecundario = $usuarios['coordinador2@brigadas.com'];
 
         $datos = [
@@ -346,7 +348,7 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarNoticias(array $usuarios): void
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
         $coordinadorSecundario = $usuarios['coordinador2@brigadas.com'];
 
         $datos = [
@@ -405,7 +407,7 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarSolicitudesBrigada(array $brigadas): void
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
 
         $datos = [
             [

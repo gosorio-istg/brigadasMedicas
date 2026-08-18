@@ -10,10 +10,9 @@
 
   <section class="section-block">
     <div class="stat-grid" id="stat-grid">
-      <div class="stat-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
-      <div class="stat-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
-      <div class="stat-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
-      <div class="stat-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
+      @for ($i = 0; $i < 6; $i++)
+        <div class="stat-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text" style="width:60%"></div></div>
+      @endfor
     </div>
   </section>
 
@@ -28,15 +27,48 @@
       </div>
     </section>
 
-    <section class="section-block" id="seccion-chart-especialidades">
-      <h2 class="section-title">Atenciones por especialidad</h2>
+    <section class="section-block" id="seccion-chart-campanas">
+      <h2 class="section-title">Campañas por estado</h2>
       <div class="card">
-        <div class="chart-bars" id="chart-especialidades">
-          <p class="page-subtitle">Cargando...</p>
+        <div class="chart-card-canvas-wrap" id="wrap-chart-campanas">
+          <canvas id="chart-campanas"></canvas>
         </div>
       </div>
     </section>
   </div>
+
+  <section class="section-block" id="seccion-charts-reportes">
+    <h2 class="section-title">Indicadores de atención</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="flex-between"><strong>Atenciones por especialidad</strong></div>
+        <div class="chart-card-canvas-wrap" id="wrap-chart-especialidades">
+          <canvas id="chart-especialidades"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="flex-between"><strong>Actividad últimos 7 días</strong></div>
+        <div class="chart-card-canvas-wrap" id="wrap-chart-tendencia">
+          <canvas id="chart-tendencia"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="flex-between"><strong>Turnos por estado</strong></div>
+        <div class="chart-card-canvas-wrap" id="wrap-chart-estados">
+          <canvas id="chart-estados"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="seccion-chart-sectores">
+    <h2 class="section-title">Sectores con más turnos</h2>
+    <div class="card">
+      <div class="chart-card-canvas-wrap" id="wrap-chart-sectores">
+        <canvas id="chart-sectores"></canvas>
+      </div>
+    </div>
+  </section>
 
   <section class="section-block" id="seccion-noticias">
     <div class="flex-between">
@@ -50,7 +82,28 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script>
+  // Paleta consistente con las variables CSS de styles.css (--color-primary, etc.), para que
+  // los gráficos de Chart.js se vean como parte del mismo sistema visual, no una librería pegada.
+  const PALETA = {
+    primary: '#1565C0', primaryLight: 'rgba(21, 101, 192, 0.15)',
+    secondary: '#43A047', accent: '#42A5F5',
+    success: '#22C55E', error: '#EF4444', warning: '#F59E0B', info: '#3B82F6',
+    muted: '#607D8B', grid: '#E2E8F0',
+  };
+  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+  Chart.defaults.color = PALETA.muted;
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+  const ESTADO_TURNO_COLOR = {
+    pendiente: PALETA.warning, en_espera: PALETA.accent, atendido: PALETA.success,
+    cancelado: PALETA.error, no_asistio: '#94A3B8',
+  };
+  const ESTADO_BRIGADA_COLOR = {
+    programada: PALETA.info, en_curso: PALETA.warning, finalizada: PALETA.success, cancelada: PALETA.error,
+  };
+
   async function cargarDashboard() {
     // No se pide (ni se muestra) lo que este usuario no tiene permiso de ver: antes el
     // dashboard llamaba a /medicos, /reportes/resumen y /noticias sin condición, así que
@@ -59,21 +112,30 @@
     const puedeReportes = hasPermission('reportes.ver');
     const puedeNoticias = hasPermission('noticias.gestionar');
 
-    if (!puedeReportes) document.getElementById('seccion-chart-especialidades').remove();
+    if (!puedeReportes) {
+      document.getElementById('seccion-charts-reportes').remove();
+      document.getElementById('seccion-chart-sectores').remove();
+    }
     if (!puedeNoticias) document.getElementById('seccion-noticias').remove();
-    if (!puedeReportes) document.getElementById('grid-resumen').style.gridTemplateColumns = '1fr';
 
-    const [pacientesRes, brigadasRes, medicosRes, reporteRes, noticiasRes] = await Promise.all([
+    const [pacientesRes, brigadasRes, medicosRes, reporteRes, sectorRes, noticiasRes] = await Promise.all([
       Api.get('/pacientes?per_page=1'),
       Api.get('/brigadas?per_page=100'),
       puedeMedicos ? Api.get('/medicos?per_page=100') : Promise.resolve(null),
       puedeReportes ? Api.get('/reportes/resumen') : Promise.resolve(null),
+      puedeReportes ? Api.get('/reportes/por-sector') : Promise.resolve(null),
       puedeNoticias ? Api.get('/noticias?per_page=2') : Promise.resolve(null),
     ]);
 
     pintarEstadisticas(pacientesRes, brigadasRes, medicosRes, reporteRes);
     pintarProximasBrigadas(brigadasRes);
-    if (puedeReportes) pintarChartEspecialidades(reporteRes);
+    pintarChartCampanas(brigadasRes);
+    if (puedeReportes) {
+      pintarChartEspecialidades(reporteRes);
+      pintarChartTendencia(reporteRes);
+      pintarChartEstados(reporteRes);
+      pintarChartSectores(sectorRes);
+    }
     if (puedeNoticias) pintarNoticias(noticiasRes);
   }
 
@@ -81,14 +143,21 @@
     const totalPacientes = pacientesRes.ok ? (pacientesRes.meta?.total ?? '—') : '—';
     const brigadas = brigadasRes.ok ? brigadasRes.data : [];
     const brigadasActivas = brigadas.filter(b => b.estado === 'en_curso').length;
+    const brigadasProgramadas = brigadas.filter(b => b.estado === 'programada').length;
 
     const tarjetas = [
       { valor: totalPacientes, etiqueta: 'Pacientes registrados' },
       { valor: brigadasActivas, etiqueta: 'Campañas en curso' },
+      { valor: brigadasProgramadas, etiqueta: 'Campañas programadas' },
     ];
 
     if (reporteRes) {
-      tarjetas.push({ valor: reporteRes.ok ? reporteRes.data.total_atendidos : '—', etiqueta: 'Total atendidos' });
+      const r = reporteRes.ok ? reporteRes.data : null;
+      tarjetas.push({ valor: r ? r.total_atendidos : '—', etiqueta: 'Total atendidos' });
+      const tasa = r && r.total_turnos > 0 ? `${Math.round((r.total_atendidos / r.total_turnos) * 100)}%` : '—';
+      tarjetas.push({ valor: tasa, etiqueta: 'Tasa de atención' });
+      const espera = r && r.tiempo_promedio_espera_minutos !== null ? `${r.tiempo_promedio_espera_minutos} min` : '—';
+      tarjetas.push({ valor: espera, etiqueta: 'Espera promedio' });
     }
     if (medicosRes) {
       const medicosDisponibles = medicosRes.ok ? medicosRes.data.filter(m => m.disponible).length : '—';
@@ -134,25 +203,122 @@
       </article>`).join('');
   }
 
+  function vaciarSiNoHayDatos(wrapId, canvasId, hayDatos, mensaje) {
+    if (hayDatos) return false;
+    document.getElementById(wrapId).innerHTML = `<div class="chart-card-empty">${mensaje}</div>`;
+    return true;
+  }
+
+  function pintarChartCampanas(brigadasRes) {
+    if (!brigadasRes.ok) {
+      document.getElementById('wrap-chart-campanas').innerHTML = `<div class="chart-card-empty">${brigadasRes.message}</div>`;
+      return;
+    }
+    const estados = ['programada', 'en_curso', 'finalizada', 'cancelada'];
+    const conteos = estados.map(e => brigadasRes.data.filter(b => b.estado === e).length);
+    if (vaciarSiNoHayDatos('wrap-chart-campanas', 'chart-campanas', conteos.some(c => c > 0), 'Todavía no hay campañas registradas.')) return;
+
+    new Chart(document.getElementById('chart-campanas'), {
+      type: 'doughnut',
+      data: {
+        labels: estados.map(estadoBrigadaLabel),
+        datasets: [{ data: conteos, backgroundColor: estados.map(e => ESTADO_BRIGADA_COLOR[e]), borderWidth: 0 }],
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
+    });
+  }
+
   function pintarChartEspecialidades(reporteRes) {
-    const contenedor = document.getElementById('chart-especialidades');
     if (!reporteRes.ok) {
-      contenedor.innerHTML = `<p class="page-subtitle">${reporteRes.message}</p>`;
+      document.getElementById('wrap-chart-especialidades').innerHTML = `<div class="chart-card-empty">${reporteRes.message}</div>`;
       return;
     }
-
     const desglose = reporteRes.data.desglose_por_especialidad || [];
-    if (!desglose.length) {
-      contenedor.innerHTML = `<p class="page-subtitle">Todavía no hay turnos registrados.</p>`;
+    if (vaciarSiNoHayDatos('wrap-chart-especialidades', 'chart-especialidades', desglose.length > 0, 'Todavía no hay turnos registrados.')) return;
+
+    new Chart(document.getElementById('chart-especialidades'), {
+      type: 'bar',
+      data: {
+        labels: desglose.map(d => d.especialidad),
+        datasets: [
+          { label: 'Total', data: desglose.map(d => d.total), backgroundColor: PALETA.primaryLight, borderColor: PALETA.primary, borderWidth: 1, borderRadius: 4 },
+          { label: 'Atendidos', data: desglose.map(d => d.atendidos), backgroundColor: PALETA.secondary, borderRadius: 4 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: PALETA.grid } }, x: { grid: { display: false } } },
+        plugins: { legend: { position: 'bottom' } },
+      },
+    });
+  }
+
+  function pintarChartTendencia(reporteRes) {
+    if (!reporteRes.ok) {
+      document.getElementById('wrap-chart-tendencia').innerHTML = `<div class="chart-card-empty">${reporteRes.message}</div>`;
       return;
     }
+    const dias = reporteRes.data.tendencia_semanal || [];
+    if (vaciarSiNoHayDatos('wrap-chart-tendencia', 'chart-tendencia', dias.length > 0, 'Sin actividad reciente.')) return;
 
-    const maximo = Math.max(...desglose.map(d => d.total), 1);
-    contenedor.innerHTML = desglose.map(d => `
-      <div class="chart-bar-item">
-        <div class="chart-bar" style="height:${Math.max(8, Math.round((d.total / maximo) * 150))}px" data-value="${d.total}"></div>
-        <span class="chart-bar-label">${d.especialidad}</span>
-      </div>`).join('');
+    new Chart(document.getElementById('chart-tendencia'), {
+      type: 'bar',
+      data: {
+        labels: dias.map(d => formatearFechaCorta(d.fecha)),
+        datasets: [
+          { label: 'Turnos', data: dias.map(d => d.total), backgroundColor: PALETA.primaryLight, borderColor: PALETA.primary, borderWidth: 1, borderRadius: 4 },
+          { label: 'Atendidos', data: dias.map(d => d.atendidos), backgroundColor: PALETA.secondary, borderRadius: 4 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: PALETA.grid } }, x: { grid: { display: false } } },
+        plugins: { legend: { position: 'bottom' } },
+      },
+    });
+  }
+
+  function pintarChartEstados(reporteRes) {
+    if (!reporteRes.ok) {
+      document.getElementById('wrap-chart-estados').innerHTML = `<div class="chart-card-empty">${reporteRes.message}</div>`;
+      return;
+    }
+    const desglose = (reporteRes.data.desglose_por_estado || []).filter(d => d.total > 0);
+    if (vaciarSiNoHayDatos('wrap-chart-estados', 'chart-estados', desglose.length > 0, 'Todavía no hay turnos registrados.')) return;
+
+    new Chart(document.getElementById('chart-estados'), {
+      type: 'doughnut',
+      data: {
+        labels: desglose.map(d => estadoTurnoLabel(d.estado)),
+        datasets: [{ data: desglose.map(d => d.total), backgroundColor: desglose.map(d => ESTADO_TURNO_COLOR[d.estado]), borderWidth: 0 }],
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
+    });
+  }
+
+  function pintarChartSectores(sectorRes) {
+    if (!sectorRes.ok) {
+      document.getElementById('wrap-chart-sectores').innerHTML = `<div class="chart-card-empty">${sectorRes.message}</div>`;
+      return;
+    }
+    const top = [...sectorRes.data].sort((a, b) => b.total_turnos - a.total_turnos).slice(0, 8);
+    if (vaciarSiNoHayDatos('wrap-chart-sectores', 'chart-sectores', top.length > 0, 'Todavía no hay turnos registrados.')) return;
+
+    new Chart(document.getElementById('chart-sectores'), {
+      type: 'bar',
+      data: {
+        labels: top.map(s => s.sector),
+        datasets: [
+          { label: 'Turnos totales', data: top.map(s => s.total_turnos), backgroundColor: PALETA.primaryLight, borderColor: PALETA.primary, borderWidth: 1, borderRadius: 4 },
+          { label: 'Atendidos', data: top.map(s => s.total_atendidos), backgroundColor: PALETA.secondary, borderRadius: 4 },
+        ],
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: PALETA.grid } }, y: { grid: { display: false } } },
+        plugins: { legend: { position: 'bottom' } },
+      },
+    });
   }
 
   function pintarNoticias(noticiasRes) {
@@ -176,6 +342,12 @@
           <p class="noticia-card-desc">${n.resumen}</p>
         </div>
       </article>`).join('');
+  }
+
+  function formatearFechaCorta(fechaIso) {
+    const [, mes, dia] = fechaIso.split('-');
+    const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    return `${dia} ${meses[parseInt(mes, 10) - 1]}`;
   }
 
   cargarDashboard();

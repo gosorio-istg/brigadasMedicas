@@ -20,16 +20,21 @@ class TurnoController extends Controller
 {
     public function index(Request $request)
     {
+        $medicoActual = Medico::where('user_id', Auth::id())->first();
+
         $turnos = Turno::with(['paciente', 'brigada', 'especialidad', 'registrador', 'medico', 'signosVitales', 'atencion'])
             ->when($request->filled('brigada_id'), fn ($q) => $q->where('brigada_id', $request->brigada_id))
             ->when($request->filled('especialidad_id'), fn ($q) => $q->where('especialidad_id', $request->especialidad_id))
             ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->estado))
             // El médico ve solo los pacientes de las campañas en las que está asignado
             // (tabla brigada_medico), no la cola completa de todas las campañas.
-            ->when($request->boolean('mis_brigadas'), function ($q) {
-                $medico = Medico::where('user_id', Auth::id())->first();
-                $q->whereIn('brigada_id', $medico?->brigadas()->pluck('brigadas.id') ?? []);
-            })
+            ->when($request->boolean('mis_brigadas'), fn ($q) => $q->whereIn('brigada_id', $medicoActual?->brigadas()->pluck('brigadas.id') ?? []))
+            // Un médico solo puede atender turnos de su propia especialidad (lo mismo que ya
+            // se valida al asignarlo a la campaña y al guardar la atención): se aplica siempre
+            // que quien pregunta es un médico, sin depender de que cada pantalla recuerde
+            // mandar el filtro, para que ninguna vista (cola de inicio, detalle de campaña,
+            // etc.) le muestre turnos de otra especialidad que igual va a rechazar al atender.
+            ->when($medicoActual, fn ($q) => $q->where('especialidad_id', $medicoActual->especialidad_id))
             ->orderBy('hora_registro')
             ->paginate($this->perPage($request, 20));
 
