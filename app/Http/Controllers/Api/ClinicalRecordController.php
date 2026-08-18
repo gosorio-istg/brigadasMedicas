@@ -34,8 +34,18 @@ class ClinicalRecordController extends Controller
 
     public function storeAtencion(StoreAtencionRequest $request, Turno $turno, SyncOutboxService $sync)
     {
-        $atencion = DB::transaction(function () use ($request, $turno, $sync) {
-            $medico = Medico::where('user_id', Auth::id())->first();
+        $medico = Medico::where('user_id', Auth::id())->first();
+
+        // Si quien registra es un Médico (no un Coordinador/Brigadista actuando en su
+        // nombre), su especialidad debe coincidir con la del turno: cada doctor atiende
+        // turnos de su propia especialidad, no de cualquiera.
+        if ($medico && $medico->especialidad_id !== $turno->especialidad_id) {
+            return response()->json([
+                'message' => 'Este turno es de otra especialidad; no coincide con la tuya.',
+            ], 422);
+        }
+
+        $atencion = DB::transaction(function () use ($request, $turno, $sync, $medico) {
             $record = Atencion::updateOrCreate(
                 ['turno_id' => $turno->id],
                 $request->validated() + [

@@ -10,11 +10,11 @@ class Atencion extends Model
     protected $table = 'atenciones';
 
     protected $fillable = [
-        'turno_id', 'medico_id', 'diagnostico', 'receta', 'observaciones',
-        'registrado_por', 'fecha_atencion',
+        'turno_id', 'medico_id', 'diagnostico', 'motivo_consulta', 'tipo_atencion',
+        'requiere_referencia', 'receta', 'observaciones', 'registrado_por', 'fecha_atencion',
     ];
 
-    protected $casts = ['fecha_atencion' => 'datetime'];
+    protected $casts = ['fecha_atencion' => 'datetime', 'requiere_referencia' => 'boolean'];
 
     public function turno(): BelongsTo
     {

@@ -49,6 +49,15 @@ Route::prefix('v1')->group(function () {
         Route::put('/me', [AuthController::class, 'updateMe']);
         Route::get('/me/disponibilidad-medica', [AuthController::class, 'medicalAvailability']);
         Route::put('/me/disponibilidad-medica', [AuthController::class, 'updateMedicalAvailability']);
+        Route::get('/me/medico', [AuthController::class, 'myMedicoProfile']);
+
+        // Detalle de campaña y su plantel médico: fuera del grupo brigadas.gestionar/
+        // medicos.gestionar porque un Médico o Brigadista asignado (sin esos permisos) también
+        // necesita poder abrir el detalle de SU PROPIA campaña. BrigadaController::ensureCanView()
+        // exige el permiso de gestión o pertenencia real a la brigada.
+        Route::get('/brigadas/{brigada}', [BrigadaController::class, 'show']);
+        Route::get('/brigadas/{brigada}/medicos', [BrigadaController::class, 'medicos']);
+
         Route::get('/brigadas/{brigada}/mi-asistencia', [BrigadaAsistenciaController::class, 'show']);
         Route::put('/brigadas/{brigada}/mi-asistencia', [BrigadaAsistenciaController::class, 'update']);
 
@@ -81,7 +90,6 @@ Route::prefix('v1')->group(function () {
         Route::middleware('permission:brigadas.gestionar')->group(function () {
             Route::get('/brigadas', [BrigadaController::class, 'index']);
             Route::post('/brigadas', [BrigadaController::class, 'store']);
-            Route::get('/brigadas/{brigada}', [BrigadaController::class, 'show']);
             Route::put('/brigadas/{brigada}', [BrigadaController::class, 'update']);
             Route::delete('/brigadas/{brigada}', [BrigadaController::class, 'destroy']);
 
@@ -113,7 +121,6 @@ Route::prefix('v1')->group(function () {
             Route::put('/medicos/{medico}', [MedicoController::class, 'update']);
             Route::delete('/medicos/{medico}', [MedicoController::class, 'destroy']);
 
-            Route::get('/brigadas/{brigada}/medicos', [BrigadaController::class, 'medicos']);
             Route::post('/brigadas/{brigada}/medicos', [BrigadaController::class, 'asignarMedicos']);
         });
 

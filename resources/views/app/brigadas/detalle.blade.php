@@ -366,15 +366,33 @@
       return;
     }
     const asignadosIds = new Set((asignadosRes.data || []).map(m => m.id));
-    if (!catalogoRes.data.length) {
-      contenedor.innerHTML = '<p class="page-subtitle">Todavía no hay médicos registrados. Créalos desde el módulo Médicos.</p>';
+    const especialidadesCampana = brigadaActual?.especialidades || [];
+
+    if (!especialidadesCampana.length) {
+      contenedor.innerHTML = '<p class="page-subtitle">Esta campaña todavía no tiene especialidades definidas. Edítala primero para poder asignar médicos.</p>';
       return;
     }
-    contenedor.innerHTML = catalogoRes.data.map(m => `
-      <label style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" value="${m.id}" ${asignadosIds.has(m.id) ? 'checked' : ''}>
-        <span>${m.nombres}${m.especialidad ? ` · ${m.especialidad.nombre}` : ''}</span>
-      </label>`).join('');
+
+    // Solo se puede elegir médicos de una especialidad que la campaña realmente ofrece
+    // (antes se podía asignar cualquiera, incluso de una especialidad que la campaña ni
+    // siquiera tiene, y quedaba un médico sin ningún turno posible para atender).
+    let html = '';
+    especialidadesCampana.forEach(esp => {
+      const medicosEspecialidad = catalogoRes.data.filter(m => m.especialidad?.id === esp.id);
+      html += `<div style="margin-bottom:10px">
+        <p style="font-weight:600;font-size:var(--font-size-small);margin-bottom:6px">${esp.nombre}</p>`;
+      if (!medicosEspecialidad.length) {
+        html += `<p class="page-subtitle" style="color:var(--color-error)">Sin médicos registrados de esta especialidad — la campaña no podrá iniciarse hasta que asignes uno.</p>`;
+      } else {
+        html += medicosEspecialidad.map(m => `
+          <label style="display:flex;align-items:center;gap:8px;padding:4px 0">
+            <input type="checkbox" value="${m.id}" ${asignadosIds.has(m.id) ? 'checked' : ''}>
+            <span>${m.nombres}</span>
+          </label>`).join('');
+      }
+      html += '</div>';
+    });
+    contenedor.innerHTML = html || '<p class="page-subtitle">No hay médicos disponibles para las especialidades de esta campaña.</p>';
   });
 
   document.getElementById('btn-guardar-medicos').addEventListener('click', async () => {

@@ -15,6 +15,9 @@ class StoreAtencionRequest extends FormRequest
     {
         return [
             'diagnostico' => ['required', 'string', 'max:5000'],
+            'motivo_consulta' => ['required', 'in:enfermedad_comun,control,chequeo_preventivo,urgencia,seguimiento,otro'],
+            'tipo_atencion' => ['required', 'in:primera_vez,seguimiento'],
+            'requiere_referencia' => ['sometimes', 'boolean'],
             'receta' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'observaciones' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ];

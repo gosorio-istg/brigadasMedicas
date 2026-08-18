@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Brigada;
 use App\Models\Especialidad;
 use App\Models\Medico;
 use App\Models\User;
@@ -65,5 +66,24 @@ class ModuleApiTest extends TestCase
         $this->getJson('/api/v1/me/disponibilidad-medica')->assertOk()->assertJsonPath('data.disponible', false);
         $this->putJson('/api/v1/me/disponibilidad-medica', ['disponible' => true])->assertOk()->assertJsonPath('data.disponible', true);
         $this->assertDatabaseHas('medicos', ['user_id' => $user->id, 'disponible' => true]);
+    }
+
+    public function test_doctor_can_view_their_assigned_campaign_but_not_an_unrelated_one(): void
+    {
+        $user = User::factory()->create(['activo' => true]);
+        $user->assignRole('Medico');
+        $especialidad = Especialidad::create(['nombre' => 'Campaña '.uniqid(), 'activa' => true]);
+        $medico = Medico::create(['user_id' => $user->id, 'nombres' => $user->name, 'credencial_cmp' => 'CMP-'.random_int(1000, 9999), 'especialidad_id' => $especialidad->id, 'disponible' => true]);
+
+        $propia = Brigada::create(['nombre' => 'Brigada propia '.uniqid(), 'fecha' => now()->addDay(), 'ubicacion' => 'Sector propio', 'estado' => 'programada', 'coordinador_id' => $user->id]);
+        $propia->medicos()->attach($medico->id);
+
+        $ajena = Brigada::create(['nombre' => 'Brigada ajena '.uniqid(), 'fecha' => now()->addDay(), 'ubicacion' => 'Sector ajeno', 'estado' => 'programada', 'coordinador_id' => $user->id]);
+
+        Sanctum::actingAs($user);
+
+        $this->getJson("/api/v1/brigadas/{$propia->id}")->assertOk();
+        $this->getJson("/api/v1/brigadas/{$propia->id}/medicos")->assertOk();
+        $this->getJson("/api/v1/brigadas/{$ajena->id}")->assertForbidden();
     }
 }

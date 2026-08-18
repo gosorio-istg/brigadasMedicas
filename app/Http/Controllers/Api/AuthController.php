@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UpdateMeRequest;
+use App\Http\Resources\MedicoResource;
 use App\Http\Resources\UserResource;
 use App\Models\Medico;
 use App\Models\User;
@@ -183,6 +184,19 @@ class AuthController extends Controller
         }
 
         return response()->json(['data' => ['disponible' => $medico->disponible]]);
+    }
+
+    // Perfil del médico autenticado: especialidad + todas sus campañas asignadas con estado,
+    // para que la app pueda mostrarle cuáles están en curso/programadas sin adivinar a
+    // partir del primer turno que le aparezca en la cola.
+    public function myMedicoProfile(Request $request)
+    {
+        $medico = Medico::where('user_id', $request->user()->id)->with(['especialidad', 'brigadas'])->first();
+        if (! $medico) {
+            return response()->json(['message' => 'La cuenta no está vinculada con un registro médico.'], 404);
+        }
+
+        return new MedicoResource($medico);
     }
 
     public function logout(Request $request)

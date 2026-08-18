@@ -109,6 +109,17 @@ class TurnoController extends Controller
     {
         $data = $request->validated();
 
+        // Un turno es de una especialidad concreta; asignarle un médico de otra especialidad
+        // (ej. un ginecólogo a un turno de Odontología) no tiene sentido clínico.
+        if (! empty($data['medico_id'])) {
+            $medico = Medico::find($data['medico_id']);
+            if ($medico && $medico->especialidad_id !== $turno->especialidad_id) {
+                return response()->json([
+                    'message' => "El médico seleccionado es de {$medico->especialidad->nombre}, pero este turno es de otra especialidad.",
+                ], 422);
+            }
+        }
+
         $turno->estado = $data['estado'];
         if ($data['estado'] === 'atendido' && ! $turno->hora_atencion) {
             $turno->hora_atencion = now();

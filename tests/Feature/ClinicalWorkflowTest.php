@@ -49,11 +49,15 @@ class ClinicalWorkflowTest extends TestCase
         $this->assertSame('en_espera', $turno->fresh()->estado);
 
         $this->putJson("/api/v1/turnos/{$turno->id}/atencion", [
-            'diagnostico' => 'Diagnóstico de prueba', 'receta' => 'Tratamiento de prueba',
-            'observaciones' => 'Control en siete días',
+            'diagnostico' => 'Diagnóstico de prueba', 'motivo_consulta' => 'enfermedad_comun',
+            'tipo_atencion' => 'primera_vez', 'requiere_referencia' => false,
+            'receta' => 'Tratamiento de prueba', 'observaciones' => 'Control en siete días',
         ])->assertCreated()->assertJsonPath('data.turno_id', $turno->id);
 
-        $this->assertDatabaseHas('atenciones', ['turno_id' => $turno->id, 'diagnostico' => 'Diagnóstico de prueba']);
+        $this->assertDatabaseHas('atenciones', [
+            'turno_id' => $turno->id, 'diagnostico' => 'Diagnóstico de prueba',
+            'motivo_consulta' => 'enfermedad_comun', 'tipo_atencion' => 'primera_vez',
+        ]);
         $this->assertSame('atendido', $turno->fresh()->estado);
         $this->assertNotNull($turno->fresh()->hora_atencion);
     }

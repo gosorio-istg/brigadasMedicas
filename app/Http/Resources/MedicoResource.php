@@ -20,9 +20,14 @@ class MedicoResource extends JsonResource
                 'id' => $this->especialidad->id,
                 'nombre' => $this->especialidad->nombre,
             ]),
+            // Antes solo mandaba id/nombre: no alcanzaba para que el médico supiera en la app
+            // cuáles de sus campañas están en curso, programadas, etc. sin abrir cada una.
             'brigadas' => $this->whenLoaded('brigadas', fn () => $this->brigadas->map(fn ($brigada) => [
                 'id' => $brigada->id,
                 'nombre' => $brigada->nombre,
+                'estado' => $brigada->estado,
+                'fecha' => $brigada->fecha?->format('Y-m-d'),
+                'ubicacion' => $brigada->ubicacion,
             ])),
             'created_at' => $this->created_at,
         ];

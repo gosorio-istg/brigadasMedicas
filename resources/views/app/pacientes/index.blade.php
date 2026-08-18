@@ -74,6 +74,59 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-editar-atencion">
+    <div class="modal" role="dialog" style="max-width:520px">
+      <h2 class="modal-title">Editar atención</h2>
+      <form id="form-editar-atencion">
+        <div class="form-group">
+          <label class="form-label" for="ea-diagnostico">Diagnóstico</label>
+          <textarea id="ea-diagnostico" class="form-control" required></textarea>
+          <span class="form-error-msg" id="error-ea-diagnostico" hidden></span>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="ea-motivo">Motivo de consulta</label>
+            <select id="ea-motivo" class="form-control">
+              <option value="enfermedad_comun">Enfermedad común</option>
+              <option value="control">Control</option>
+              <option value="chequeo_preventivo">Chequeo preventivo</option>
+              <option value="urgencia">Urgencia</option>
+              <option value="seguimiento">Seguimiento</option>
+              <option value="otro">Otro</option>
+            </select>
+            <span class="form-error-msg" id="error-ea-motivo_consulta" hidden></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ea-tipo">Tipo de atención</label>
+            <select id="ea-tipo" class="form-control">
+              <option value="primera_vez">Primera vez</option>
+              <option value="seguimiento">Seguimiento</option>
+            </select>
+            <span class="form-error-msg" id="error-ea-tipo_atencion" hidden></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="ea-referencia" style="width:18px;height:18px">
+            ¿Requiere referencia a otro nivel de atención?
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ea-receta">Receta (opcional)</label>
+          <textarea id="ea-receta" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ea-observaciones">Observaciones (opcional)</label>
+          <textarea id="ea-observaciones" class="form-control"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btn-guardar-atencion">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-nuevo-turno">
     <div class="modal" role="dialog" style="max-width:520px">
       <h2 class="modal-title">Registrar turno</h2>
@@ -297,6 +350,15 @@
 
   initTableSearch('#tabla-turnos', '#search-pacientes');
 
+  let turnosPacienteActual = [];
+  let turnoEditandoAtencion = null;
+
+  const MOTIVO_CONSULTA_LABEL = {
+    enfermedad_comun: 'Enfermedad común', control: 'Control', chequeo_preventivo: 'Chequeo preventivo',
+    urgencia: 'Urgencia', seguimiento: 'Seguimiento', otro: 'Otro',
+  };
+  const TIPO_ATENCION_LABEL = { primera_vez: 'Primera vez', seguimiento: 'Seguimiento' };
+
   async function mostrarFichaPaciente(id) {
     const cuerpo = document.getElementById('modal-paciente-body');
     cuerpo.innerHTML = 'Cargando...';
@@ -309,14 +371,21 @@
     }
 
     const p = resultado.data;
-    const historial = (p.turnos || []).map(t => `
+    turnosPacienteActual = p.turnos || [];
+    const historial = turnosPacienteActual.map(t => `
       <div style="padding:12px 0;border-bottom:1px solid var(--color-border)">
         <div class="detail-row">
           <span>${formatearFecha(t.created_at)} — ${t.especialidad?.nombre ?? ''} (${t.brigada?.nombre ?? ''})</span>
           <span class="chip ${estadoTurnoChipClass(t.estado)}">${estadoTurnoLabel(t.estado)}</span>
         </div>
         ${t.signos_vitales ? `<p class="page-subtitle">Signos: ${t.signos_vitales.presion_arterial} · ${t.signos_vitales.temperatura} °C · FC ${t.signos_vitales.frecuencia_cardiaca ?? '—'} · FR ${t.signos_vitales.frecuencia_respiratoria ?? '—'}</p>` : ''}
-        ${t.atencion ? `<p><strong>Diagnóstico:</strong> ${t.atencion.diagnostico}</p><p><strong>Receta:</strong> ${t.atencion.receta ?? 'Sin receta'}</p>${t.atencion.observaciones ? `<p><strong>Observaciones:</strong> ${t.atencion.observaciones}</p>` : ''}` : ''}
+        ${t.atencion ? `
+          <p class="page-subtitle">${MOTIVO_CONSULTA_LABEL[t.atencion.motivo_consulta] ?? ''} · ${TIPO_ATENCION_LABEL[t.atencion.tipo_atencion] ?? ''}${t.atencion.requiere_referencia ? ' · Requiere referencia' : ''}</p>
+          <p><strong>Diagnóstico:</strong> ${t.atencion.diagnostico}</p>
+          <p><strong>Receta:</strong> ${t.atencion.receta ?? 'Sin receta'}</p>
+          ${t.atencion.observaciones ? `<p><strong>Observaciones:</strong> ${t.atencion.observaciones}</p>` : ''}
+          <button type="button" class="btn btn-outline btn-sm" data-editar-atencion="${t.id}">Editar atención</button>
+        ` : ''}
       </div>`).join('') || '<p class="page-subtitle">Sin turnos registrados todavía.</p>';
 
     cuerpo.innerHTML = `
@@ -328,7 +397,68 @@
       <div class="detail-row"><span class="detail-label">Sector</span><span>${p.sector ?? '—'}</span></div>
       <h3 style="font-size:var(--font-size-small);margin:var(--space-md) 0 var(--space-sm)">Historial de atenciones</h3>
       ${historial}`;
+
+    cuerpo.querySelectorAll('[data-editar-atencion]').forEach(btn => {
+      btn.addEventListener('click', () => abrirEditarAtencion(parseInt(btn.dataset.editarAtencion, 10)));
+    });
   }
+
+  function abrirEditarAtencion(turnoId) {
+    const turno = turnosPacienteActual.find(t => t.id === turnoId);
+    if (!turno?.atencion) return;
+
+    turnoEditandoAtencion = turnoId;
+    document.getElementById('ea-diagnostico').value = turno.atencion.diagnostico ?? '';
+    document.getElementById('ea-motivo').value = turno.atencion.motivo_consulta ?? 'enfermedad_comun';
+    document.getElementById('ea-tipo').value = turno.atencion.tipo_atencion ?? 'primera_vez';
+    document.getElementById('ea-referencia').checked = !!turno.atencion.requiere_referencia;
+    document.getElementById('ea-receta').value = turno.atencion.receta ?? '';
+    document.getElementById('ea-observaciones').value = turno.atencion.observaciones ?? '';
+    document.querySelectorAll('#form-editar-atencion .form-error-msg').forEach(el => { el.hidden = true; });
+    openModal('modal-editar-atencion');
+  }
+
+  document.getElementById('form-editar-atencion').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!turnoEditandoAtencion) return;
+
+    const btn = document.getElementById('btn-guardar-atencion');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    const resultado = await Api.put(`/turnos/${turnoEditandoAtencion}/atencion`, {
+      diagnostico: document.getElementById('ea-diagnostico').value.trim(),
+      motivo_consulta: document.getElementById('ea-motivo').value,
+      tipo_atencion: document.getElementById('ea-tipo').value,
+      requiere_referencia: document.getElementById('ea-referencia').checked,
+      receta: document.getElementById('ea-receta').value.trim() || null,
+      observaciones: document.getElementById('ea-observaciones').value.trim() || null,
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Guardar';
+
+    if (!resultado.ok) {
+      if (resultado.errors) {
+        Object.entries(resultado.errors).forEach(([campo, mensajes]) => {
+          const el = document.getElementById(`error-ea-${campo}`);
+          if (el) { el.hidden = false; el.textContent = mensajes[0]; }
+        });
+      }
+      showToast(resultado.message, 'error');
+      return;
+    }
+
+    closeModal('modal-editar-atencion');
+    showToast('Atención actualizada correctamente.');
+
+    // Recarga la ficha para reflejar el cambio (el paciente sigue siendo el mismo).
+    const pacienteId = turnosPacienteActual.find(t => t.id === turnoEditandoAtencion)?.paciente?.id
+      ?? turnosPacienteActual[0]?.paciente?.id;
+    turnoEditandoAtencion = null;
+    if (pacienteId) mostrarFichaPaciente(pacienteId);
+    cargarTurnos(paginaActual);
+  });
 
   // --- Modal: registrar turno ---
   // Los cupos "usados" cambian a cada rato (cada turno nuevo los mueve), así que no se

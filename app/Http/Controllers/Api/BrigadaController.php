@@ -12,6 +12,8 @@ use App\Http\Resources\BrigadaResource;
 use App\Http\Resources\BrigadistaResource;
 use App\Http\Resources\MedicoResource;
 use App\Models\Brigada;
+use App\Models\Especialidad;
+use App\Models\Medico;
 use App\Models\Turno;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,6 +50,8 @@ class BrigadaController extends Controller
 
     public function show(Brigada $brigada)
     {
+        $this->ensureCanView($brigada);
+
         $brigada->load(['coordinador', 'especialidades']);
         $brigada->loadCount([
             'asistencias as asistiran_count' => fn ($query) => $query->where('estado', 'asistira'),
@@ -88,6 +92,23 @@ class BrigadaController extends Controller
             }
         }
 
+        // Tampoco tenía resguardo para iniciar: se podía poner "en_curso" sin tener ni un
+        // médico asignado para cada especialidad ofrecida, dejando pacientes registrándose
+        // en una cola que nadie iba a atender.
+        if (($data['estado'] ?? null) === 'en_curso' && $brigada->estado !== 'en_curso') {
+            $especialidadesOfrecidas = $brigada->especialidades()->pluck('especialidades.id');
+            $especialidadesConMedico = $brigada->medicos()->pluck('especialidad_id')->unique();
+            $faltantes = $especialidadesOfrecidas->diff($especialidadesConMedico);
+
+            if ($faltantes->isNotEmpty()) {
+                $nombres = Especialidad::whereIn('id', $faltantes)->pluck('nombre')->implode(', ');
+
+                return response()->json([
+                    'message' => "No se puede iniciar la campaña: falta asignar un médico para: {$nombres}.",
+                ], 422);
+            }
+        }
+
         $brigada->fill([
             'nombre' => $data['nombre'] ?? $brigada->nombre,
             'descripcion' => array_key_exists('descripcion', $data) ? $data['descripcion'] : $brigada->descripcion,
@@ -122,12 +143,55 @@ class BrigadaController extends Controller
 
     public function medicos(Brigada $brigada)
     {
+        $this->ensureCanView($brigada);
+
         return MedicoResource::collection($brigada->medicos()->with('especialidad')->get());
+    }
+
+    // Antes show()/medicos() exigían el permiso brigadas.gestionar/medicos.gestionar (solo
+    // Coordinador/Administrador), así que un Médico o Brigadista asignado a la campaña recibía
+    // 403 al intentar ver el detalle de su propia campaña desde la app. Estas rutas ahora solo
+    // exigen sesión autenticada y este método verifica que el usuario tenga permiso de gestión
+    // o esté realmente asignado a la brigada (como médico o como brigadista).
+    private function ensureCanView(Brigada $brigada): void
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->can('brigadas.gestionar')) {
+            return;
+        }
+
+        $medico = Medico::where('user_id', $user->id)->first();
+        if ($medico && $brigada->medicos()->where('medicos.id', $medico->id)->exists()) {
+            return;
+        }
+
+        if ($brigada->brigadistas()->where('users.id', $user->id)->exists()) {
+            return;
+        }
+
+        abort(403, 'No tienes acceso a esta campaña.');
     }
 
     public function asignarMedicos(AsignarMedicosRequest $request, Brigada $brigada)
     {
-        $brigada->medicos()->sync($request->validated('medicos'));
+        $medicoIds = $request->validated('medicos');
+
+        // Antes se podía asignar cualquier médico sin importar su especialidad (ej. un
+        // psicólogo a una campaña que solo ofrece Medicina General y Enfermería), lo que
+        // generaba turnos que ese médico nunca iba a poder atender.
+        $especialidadesOfrecidas = $brigada->especialidades()->pluck('especialidades.id');
+        $medicosInvalidos = Medico::whereIn('id', $medicoIds)
+            ->whereNotIn('especialidad_id', $especialidadesOfrecidas)
+            ->pluck('nombres');
+
+        if ($medicosInvalidos->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Estos médicos no tienen una especialidad que esta campaña ofrezca: '.$medicosInvalidos->implode(', ').'.',
+            ], 422);
+        }
+
+        $brigada->medicos()->sync($medicoIds);
 
         return MedicoResource::collection($brigada->medicos()->with('especialidad')->get());
     }

@@ -22,7 +22,7 @@ class PacienteController extends Controller
                         ->orWhere('apellidos', 'like', "%{$buscar}%");
                 });
             })
-            ->orderBy('apellidos')
+            ->orderByDesc('created_at')
             ->paginate($this->perPage($request));
 
         return PacienteResource::collection($pacientes);
