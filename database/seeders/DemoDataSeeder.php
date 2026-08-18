@@ -41,8 +41,8 @@ class DemoDataSeeder extends Seeder
     private function sembrarCiudadanos(): void
     {
         $datos = [
-            ['email' => 'ciudadano1@brigadasalud.test', 'name' => 'Rosa', 'apellido' => 'Vera Cedeño', 'cedula' => '0911111116', 'sector' => 'Cooperativa Suárez'],
-            ['email' => 'ciudadano2@brigadasalud.test', 'name' => 'Manuel', 'apellido' => 'Reyes Baque', 'cedula' => '0922222227', 'sector' => 'Isla Trinitaria'],
+            ['email' => 'ciudadano1@brigadas.com', 'name' => 'Rosa', 'apellido' => 'Vera Cedeño', 'cedula' => '0911111116', 'sector' => 'Cooperativa Suárez'],
+            ['email' => 'ciudadano2@brigadas.com', 'name' => 'Manuel', 'apellido' => 'Reyes Baque', 'cedula' => '0922222227', 'sector' => 'Isla Trinitaria'],
         ];
 
         foreach ($datos as $dato) {
@@ -53,7 +53,7 @@ class DemoDataSeeder extends Seeder
                     'apellido' => $dato['apellido'],
                     'cedula' => $dato['cedula'],
                     'sector' => $dato['sector'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make('123'),
                     'activo' => true,
                 ]
             );
@@ -76,17 +76,17 @@ class DemoDataSeeder extends Seeder
     private function sembrarUsuarios(): array
     {
         $datos = [
-            ['email' => 'coordinador2@brigadasalud.test', 'name' => 'Roberto Iván Salazar', 'cedula' => '0101010106', 'rol' => 'Coordinador'],
-            ['email' => 'brigadista1@brigadasalud.test', 'name' => 'María Fernanda Ochoa', 'cedula' => '2424242424', 'rol' => 'Brigadista'],
-            ['email' => 'brigadista2@brigadasalud.test', 'name' => 'Carlos Andrés Zambrano', 'cedula' => '1313131318', 'rol' => 'Brigadista'],
-            ['email' => 'brigadista3@brigadasalud.test', 'name' => 'Lucía Paola Mendoza', 'cedula' => '0808080808', 'rol' => 'Brigadista'],
+            ['email' => 'coordinador2@brigadas.com', 'name' => 'Roberto Iván Salazar', 'cedula' => '0101010106', 'rol' => 'Coordinador'],
+            ['email' => 'brigadista1@brigadas.com', 'name' => 'María Fernanda Ochoa', 'cedula' => '2424242424', 'rol' => 'Brigadista'],
+            ['email' => 'brigadista2@brigadas.com', 'name' => 'Carlos Andrés Zambrano', 'cedula' => '1313131318', 'rol' => 'Brigadista'],
+            ['email' => 'brigadista3@brigadas.com', 'name' => 'Lucía Paola Mendoza', 'cedula' => '0808080808', 'rol' => 'Brigadista'],
         ];
 
         $usuarios = [];
         foreach ($datos as $dato) {
             $usuario = User::firstOrCreate(
                 ['email' => $dato['email']],
-                ['name' => $dato['name'], 'cedula' => $dato['cedula'], 'password' => Hash::make('password123'), 'activo' => true]
+                ['name' => $dato['name'], 'cedula' => $dato['cedula'], 'password' => Hash::make('123'), 'activo' => true]
             );
             $usuario->assignRole($dato['rol']);
             $usuarios[$dato['email']] = $usuario;
@@ -98,15 +98,15 @@ class DemoDataSeeder extends Seeder
     private function sembrarMedicos(array $especialidades): array
     {
         $datos = [
-            ['credencial_cmp' => 'CMP-1001', 'nombres' => 'Dra. Ana Belén Torres', 'apellido' => 'Torres Macías', 'cedula' => '0931000011', 'email' => 'medico1@brigadasalud.test', 'especialidad' => 'Medicina General', 'telefono' => '0991000001', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1002', 'nombres' => 'Dr. Jorge Luis Vera', 'apellido' => 'Vera Ponce', 'cedula' => '0931000029', 'email' => 'medico2@brigadasalud.test', 'especialidad' => 'Medicina General', 'telefono' => '0991000002', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1003', 'nombres' => 'Dra. Camila Rodríguez', 'apellido' => 'Rodríguez Salas', 'cedula' => '0931000037', 'email' => 'medico3@brigadasalud.test', 'especialidad' => 'Pediatría', 'telefono' => '0991000003', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1004', 'nombres' => 'Dr. Esteban Ramírez', 'apellido' => 'Ramírez Vélez', 'cedula' => '0931000045', 'email' => 'medico4@brigadasalud.test', 'especialidad' => 'Pediatría', 'telefono' => '0991000004', 'disponible' => false],
-            ['credencial_cmp' => 'CMP-1005', 'nombres' => 'Dr. Miguel Ángel Suárez', 'apellido' => 'Suárez Rivas', 'cedula' => '0931000052', 'email' => 'medico5@brigadasalud.test', 'especialidad' => 'Odontología', 'telefono' => '0991000005', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1006', 'nombres' => 'Dra. Verónica Chávez', 'apellido' => 'Chávez Loor', 'cedula' => '0931000060', 'email' => 'medico6@brigadasalud.test', 'especialidad' => 'Ginecología', 'telefono' => '0991000006', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1007', 'nombres' => 'Lcda. Gabriela Muñoz', 'apellido' => 'Muñoz Zambrano', 'cedula' => '0931000078', 'email' => 'medico7@brigadasalud.test', 'especialidad' => 'Psicología', 'telefono' => '0991000007', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1008', 'nombres' => 'Lcdo. Kevin Alexander Loor', 'apellido' => 'Loor Cedeño', 'cedula' => '0931000086', 'email' => 'medico8@brigadasalud.test', 'especialidad' => 'Enfermería', 'telefono' => '0991000008', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1009', 'nombres' => 'Dr. Patricio Andrade Vélez', 'apellido' => 'Andrade Vélez', 'cedula' => '0931000094', 'email' => 'medico9@brigadasalud.test', 'especialidad' => 'Oftalmología', 'telefono' => '0991000009', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1001', 'nombres' => 'Dra. Jenniffer Yajaira', 'apellido' => 'Corozo Chávez', 'cedula' => '0931000011', 'email' => 'medico1@brigadas.com', 'especialidad' => 'Medicina General', 'telefono' => '0991000001', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1002', 'nombres' => 'Dr. Jenniffer2 Yajaira2', 'apellido' => 'Corozo2 Chávez2', 'cedula' => '0931000029', 'email' => 'medico2@brigadas.com', 'especialidad' => 'Medicina General', 'telefono' => '0991000002', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1003', 'nombres' => 'Dra. Jenniffer3 Yajaira3', 'apellido' => 'Corozo3 Chávez3', 'cedula' => '0931000037', 'email' => 'medico3@brigadas.com', 'especialidad' => 'Pediatría', 'telefono' => '0991000003', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1004', 'nombres' => 'Dr. Esteban Ramírez', 'apellido' => 'Ramírez Vélez', 'cedula' => '0931000045', 'email' => 'medico4@brigadas.com', 'especialidad' => 'Pediatría', 'telefono' => '0991000004', 'disponible' => false],
+            ['credencial_cmp' => 'CMP-1005', 'nombres' => 'Dra. Jenniffer4 Yajaira4', 'apellido' => 'Corozo4 Chávez4', 'cedula' => '0931000052', 'email' => 'medico5@brigadas.com', 'especialidad' => 'Odontología', 'telefono' => '0991000005', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1006', 'nombres' => 'Dra. Verónica Chávez', 'apellido' => 'Chávez Loor', 'cedula' => '0931000060', 'email' => 'medico6@brigadas.com', 'especialidad' => 'Ginecología', 'telefono' => '0991000006', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1007', 'nombres' => 'Lcda. Gabriela Muñoz', 'apellido' => 'Muñoz Zambrano', 'cedula' => '0931000078', 'email' => 'medico7@brigadas.com', 'especialidad' => 'Psicología', 'telefono' => '0991000007', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1008', 'nombres' => 'Lcdo. Kevin Alexander Loor', 'apellido' => 'Loor Cedeño', 'cedula' => '0931000086', 'email' => 'medico8@brigadas.com', 'especialidad' => 'Enfermería', 'telefono' => '0991000008', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1009', 'nombres' => 'Dr. Patricio Andrade Vélez', 'apellido' => 'Andrade Vélez', 'cedula' => '0931000094', 'email' => 'medico9@brigadas.com', 'especialidad' => 'Oftalmología', 'telefono' => '0991000009', 'disponible' => true],
         ];
 
         $medicos = [];
@@ -119,7 +119,7 @@ class DemoDataSeeder extends Seeder
                     'name' => $dato['nombres'],
                     'apellido' => $dato['apellido'],
                     'cedula' => $dato['cedula'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make('123'),
                     'activo' => true,
                 ]
             );
@@ -142,8 +142,8 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarBrigadas(array $especialidades, array $usuarios, array $medicos): array
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
-        $coordinadorSecundario = $usuarios['coordinador2@brigadasalud.test'];
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
+        $coordinadorSecundario = $usuarios['coordinador2@brigadas.com'];
 
         $datos = [
             [
@@ -230,19 +230,19 @@ class DemoDataSeeder extends Seeder
     {
         $datos = [
             // Brigada en curso: equipo completo, ambos ya confirmados como asistidos.
-            ['brigada' => 'Brigada Isla Trinitaria', 'email' => 'brigadista1@brigadasalud.test', 'rol_equipo' => 'registro', 'asistio' => true],
-            ['brigada' => 'Brigada Isla Trinitaria', 'email' => 'brigadista2@brigadasalud.test', 'rol_equipo' => 'apoyo_logistico', 'asistio' => true],
+            ['brigada' => 'Brigada Isla Trinitaria', 'email' => 'brigadista1@brigadas.com', 'rol_equipo' => 'registro', 'asistio' => true],
+            ['brigada' => 'Brigada Isla Trinitaria', 'email' => 'brigadista2@brigadas.com', 'rol_equipo' => 'apoyo_logistico', 'asistio' => true],
 
             // Brigada finalizada: asistencia ya confirmada, útil para reportes de participación.
-            ['brigada' => 'Brigada Bastión Popular', 'email' => 'brigadista1@brigadasalud.test', 'rol_equipo' => 'registro', 'asistio' => true],
-            ['brigada' => 'Brigada Bastión Popular', 'email' => 'brigadista3@brigadasalud.test', 'rol_equipo' => 'coordinacion', 'asistio' => true],
+            ['brigada' => 'Brigada Bastión Popular', 'email' => 'brigadista1@brigadas.com', 'rol_equipo' => 'registro', 'asistio' => true],
+            ['brigada' => 'Brigada Bastión Popular', 'email' => 'brigadista3@brigadas.com', 'rol_equipo' => 'coordinacion', 'asistio' => true],
 
             // Brigadas programadas: asignados pero con asistencia aún sin confirmar (null).
-            ['brigada' => 'Brigada Sector Suárez', 'email' => 'brigadista2@brigadasalud.test', 'rol_equipo' => 'registro', 'asistio' => null],
-            ['brigada' => 'Brigada Monte Sinaí', 'email' => 'brigadista3@brigadasalud.test', 'rol_equipo' => 'apoyo_logistico', 'asistio' => null],
+            ['brigada' => 'Brigada Sector Suárez', 'email' => 'brigadista2@brigadas.com', 'rol_equipo' => 'registro', 'asistio' => null],
+            ['brigada' => 'Brigada Monte Sinaí', 'email' => 'brigadista3@brigadas.com', 'rol_equipo' => 'apoyo_logistico', 'asistio' => null],
 
             // Brigada cancelada: quedó asignado pero no llegó a asistir.
-            ['brigada' => 'Brigada Nigeria - Los Vergeles', 'email' => 'brigadista1@brigadasalud.test', 'rol_equipo' => 'registro', 'asistio' => false],
+            ['brigada' => 'Brigada Nigeria - Los Vergeles', 'email' => 'brigadista1@brigadas.com', 'rol_equipo' => 'registro', 'asistio' => false],
         ];
 
         foreach ($datos as $dato) {
@@ -279,7 +279,7 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarTurnos(array $brigadas, array $especialidades, array $pacientes, array $medicos, array $usuarios): void
     {
-        $registrador = $usuarios['brigadista1@brigadasalud.test'];
+        $registrador = $usuarios['brigadista1@brigadas.com'];
 
         $datos = [
             // Brigada en curso: un turno en cada estado posible, para poder probar la cola de espera completa.
@@ -346,8 +346,8 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarNoticias(array $usuarios): void
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
-        $coordinadorSecundario = $usuarios['coordinador2@brigadasalud.test'];
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
+        $coordinadorSecundario = $usuarios['coordinador2@brigadas.com'];
 
         $datos = [
             [
@@ -405,7 +405,7 @@ class DemoDataSeeder extends Seeder
 
     private function sembrarSolicitudesBrigada(array $brigadas): void
     {
-        $coordinadorPrincipal = User::where('email', 'coordinador@brigadasalud.test')->first();
+        $coordinadorPrincipal = User::where('email', 'coordinador@brigadas.com')->first();
 
         $datos = [
             [
