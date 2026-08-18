@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BrigadaAsistenciaController;
 use App\Http\Controllers\Api\BrigadaController;
 use App\Http\Controllers\Api\ClinicalRecordController;
 use App\Http\Controllers\Api\ComunidadController;
+use App\Http\Controllers\Api\DevToolsController;
 use App\Http\Controllers\Api\EspecialidadController;
 use App\Http\Controllers\Api\MedicoController;
 use App\Http\Controllers\Api\NoticiaController;
@@ -41,6 +42,9 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+
+        // Solo entornos local/testing (el controlador lo vuelve a verificar) y solo Administrador.
+        Route::post('/dev/reset-demo', [DevToolsController::class, 'resetDemo']);
         Route::get('/me/campanas', [BrigadaAsistenciaController::class, 'myCampaigns']);
         Route::put('/me', [AuthController::class, 'updateMe']);
         Route::get('/me/disponibilidad-medica', [AuthController::class, 'medicalAvailability']);

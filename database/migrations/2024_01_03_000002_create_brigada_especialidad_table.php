@@ -1,4 +1,3 @@
-// database/migrations/2024_01_03_000002_create_brigada_especialidad_table.php
 <?php
 
 use Illuminate\Database\Migrations\Migration;

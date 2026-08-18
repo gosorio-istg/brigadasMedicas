@@ -61,6 +61,23 @@
     </div>
   </section>
 
+  @if(app()->environment('local'))
+  <section class="section-block" id="seccion-demo">
+    <h2 class="section-title">Zona de desarrollo</h2>
+    <div class="card" style="max-width:560px;border-color:var(--color-error)">
+      <p class="page-subtitle" style="margin-bottom:var(--space-md)">
+        Borra <strong>toda</strong> la base de datos y la vuelve a poblar con una demo completa:
+        coordinadores, médicos (con cuenta propia), brigadistas, ciudadanos, campañas en cada
+        estado, pacientes y turnos. Solo visible en entornos locales.
+      </p>
+      <button type="button" class="btn btn-primary" style="background:var(--color-error)" id="btn-reset-demo">
+        Reiniciar datos de demostración
+      </button>
+      <div id="resultado-demo" style="margin-top:var(--space-md);display:none"></div>
+    </div>
+  </section>
+  @endif
+
   <section class="section-block">
     <h2 class="section-title">Preferencias de notificación</h2>
     <div class="card" style="max-width:560px">
@@ -78,6 +95,25 @@
       </div>
     </div>
   </section>
+@endsection
+
+@section('modals')
+  @if(app()->environment('local'))
+  <div class="modal-overlay" id="modal-reset-demo">
+    <div class="modal" role="dialog">
+      <h2 class="modal-title">Reiniciar datos de demostración</h2>
+      <div class="modal-body">
+        <p>Esto <strong>borra todos los datos actuales</strong> (campañas, pacientes, turnos, usuarios) y los reemplaza por la demo. No se puede deshacer.</p>
+        <p>Escribe <strong>REINICIAR</strong> para confirmar:</p>
+        <input type="text" id="confirmar-reset-demo" class="form-control" autocomplete="off">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>
+        <button type="button" class="btn btn-primary" style="background:var(--color-error)" id="btn-confirmar-reset-demo">Borrar y reiniciar</button>
+      </div>
+    </div>
+  </div>
+  @endif
 @endsection
 
 @section('scripts')
@@ -211,6 +247,56 @@
 
   document.getElementById('pref-email').addEventListener('change', guardarPreferencias);
   document.getElementById('pref-push').addEventListener('change', guardarPreferencias);
+
+  const btnResetDemo = document.getElementById('btn-reset-demo');
+  if (btnResetDemo) {
+    btnResetDemo.addEventListener('click', () => {
+      document.getElementById('confirmar-reset-demo').value = '';
+      openModal('modal-reset-demo');
+    });
+
+    document.getElementById('btn-confirmar-reset-demo').addEventListener('click', async () => {
+      if (document.getElementById('confirmar-reset-demo').value.trim() !== 'REINICIAR') {
+        showToast('Escribe REINICIAR para confirmar.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btn-confirmar-reset-demo');
+      btn.disabled = true;
+      btn.textContent = 'Reiniciando... (puede tardar unos segundos)';
+
+      const resultado = await Api.post('/dev/reset-demo', {});
+
+      btn.disabled = false;
+      btn.textContent = 'Borrar y reiniciar';
+
+      if (!resultado.ok) {
+        showToast(resultado.message, 'error');
+        return;
+      }
+
+      closeModal('modal-reset-demo');
+      showToast('Datos de demostración reiniciados. Vuelve a iniciar sesión.');
+
+      const credenciales = resultado.data?.credenciales ?? resultado.credenciales;
+      const contenedor = document.getElementById('resultado-demo');
+      if (credenciales && contenedor) {
+        contenedor.style.display = 'block';
+        contenedor.innerHTML = `
+          <p class="page-subtitle">Contraseña para todas: <strong>${credenciales.password_compartido}</strong></p>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:var(--font-size-small)">
+            <div><strong>Coordinador:</strong> ${credenciales.coordinador.join(', ')}</div>
+            <div><strong>Médico:</strong> ${credenciales.medico.join(', ')}</div>
+            <div><strong>Brigadista:</strong> ${credenciales.brigadista.join(', ')}</div>
+            <div><strong>Ciudadano:</strong> ${credenciales.ciudadano.join(', ')}</div>
+          </div>`;
+      }
+
+      // Los datos de esta sesión (usuario actual, especialidades, etc.) ya no existen
+      // tras el reinicio; lo más seguro es forzar un login limpio.
+      setTimeout(() => { clearSession(); window.location.href = '{{ route("login") }}'; }, 4000);
+    });
+  }
 
   cargarCuenta();
   cargarEspecialidades();

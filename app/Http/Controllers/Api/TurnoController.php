@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateTurnoRequest;
 use App\Http\Resources\TurnoResource;
 use App\Models\Brigada;
 use App\Models\Especialidad;
+use App\Models\Medico;
 use App\Models\Paciente;
 use App\Models\Turno;
 use App\Services\SyncOutboxService;
@@ -23,6 +24,12 @@ class TurnoController extends Controller
             ->when($request->filled('brigada_id'), fn ($q) => $q->where('brigada_id', $request->brigada_id))
             ->when($request->filled('especialidad_id'), fn ($q) => $q->where('especialidad_id', $request->especialidad_id))
             ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->estado))
+            // El médico ve solo los pacientes de las campañas en las que está asignado
+            // (tabla brigada_medico), no la cola completa de todas las campañas.
+            ->when($request->boolean('mis_brigadas'), function ($q) {
+                $medico = Medico::where('user_id', Auth::id())->first();
+                $q->whereIn('brigada_id', $medico?->brigadas()->pluck('brigadas.id') ?? []);
+            })
             ->orderBy('hora_registro')
             ->paginate($this->perPage($request, 20));
 

@@ -25,6 +25,7 @@ class DemoDataSeeder extends Seeder
     {
         $especialidades = $this->sembrarEspecialidades();
         $usuarios = $this->sembrarUsuarios();
+        $this->sembrarCiudadanos();
         $medicos = $this->sembrarMedicos($especialidades);
         $brigadas = $this->sembrarBrigadas($especialidades, $usuarios, $medicos);
         $this->sembrarBrigadistas($brigadas, $usuarios);
@@ -33,6 +34,31 @@ class DemoDataSeeder extends Seeder
         $this->sembrarComunidades();
         $this->sembrarNoticias($usuarios);
         $this->sembrarSolicitudesBrigada($brigadas);
+    }
+
+    // Cuentas de Ciudadano: para probar registro/login desde la app móvil, solicitar
+    // campañas y confirmar asistencia (ninguna de las otras siembras crea este rol).
+    private function sembrarCiudadanos(): void
+    {
+        $datos = [
+            ['email' => 'ciudadano1@brigadasalud.test', 'name' => 'Rosa', 'apellido' => 'Vera Cedeño', 'cedula' => '0911111116', 'sector' => 'Cooperativa Suárez'],
+            ['email' => 'ciudadano2@brigadasalud.test', 'name' => 'Manuel', 'apellido' => 'Reyes Baque', 'cedula' => '0922222227', 'sector' => 'Isla Trinitaria'],
+        ];
+
+        foreach ($datos as $dato) {
+            $usuario = User::firstOrCreate(
+                ['email' => $dato['email']],
+                [
+                    'name' => $dato['name'],
+                    'apellido' => $dato['apellido'],
+                    'cedula' => $dato['cedula'],
+                    'sector' => $dato['sector'],
+                    'password' => Hash::make('password123'),
+                    'activo' => true,
+                ]
+            );
+            $usuario->syncRoles(['Ciudadano']);
+        }
     }
 
     private function sembrarEspecialidades(): array
@@ -72,22 +98,37 @@ class DemoDataSeeder extends Seeder
     private function sembrarMedicos(array $especialidades): array
     {
         $datos = [
-            ['credencial_cmp' => 'CMP-1001', 'nombres' => 'Dra. Ana Belén Torres', 'especialidad' => 'Medicina General', 'telefono' => '0991000001', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1002', 'nombres' => 'Dr. Jorge Luis Vera', 'especialidad' => 'Medicina General', 'telefono' => '0991000002', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1003', 'nombres' => 'Dra. Camila Rodríguez', 'especialidad' => 'Pediatría', 'telefono' => '0991000003', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1004', 'nombres' => 'Dr. Esteban Ramírez', 'especialidad' => 'Pediatría', 'telefono' => '0991000004', 'disponible' => false],
-            ['credencial_cmp' => 'CMP-1005', 'nombres' => 'Dr. Miguel Ángel Suárez', 'especialidad' => 'Odontología', 'telefono' => '0991000005', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1006', 'nombres' => 'Dra. Verónica Chávez', 'especialidad' => 'Ginecología', 'telefono' => '0991000006', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1007', 'nombres' => 'Lcda. Gabriela Muñoz', 'especialidad' => 'Psicología', 'telefono' => '0991000007', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1008', 'nombres' => 'Lcdo. Kevin Alexander Loor', 'especialidad' => 'Enfermería', 'telefono' => '0991000008', 'disponible' => true],
-            ['credencial_cmp' => 'CMP-1009', 'nombres' => 'Dr. Patricio Andrade Vélez', 'especialidad' => 'Oftalmología', 'telefono' => '0991000009', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1001', 'nombres' => 'Dra. Ana Belén Torres', 'apellido' => 'Torres Macías', 'cedula' => '0931000011', 'email' => 'medico1@brigadasalud.test', 'especialidad' => 'Medicina General', 'telefono' => '0991000001', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1002', 'nombres' => 'Dr. Jorge Luis Vera', 'apellido' => 'Vera Ponce', 'cedula' => '0931000029', 'email' => 'medico2@brigadasalud.test', 'especialidad' => 'Medicina General', 'telefono' => '0991000002', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1003', 'nombres' => 'Dra. Camila Rodríguez', 'apellido' => 'Rodríguez Salas', 'cedula' => '0931000037', 'email' => 'medico3@brigadasalud.test', 'especialidad' => 'Pediatría', 'telefono' => '0991000003', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1004', 'nombres' => 'Dr. Esteban Ramírez', 'apellido' => 'Ramírez Vélez', 'cedula' => '0931000045', 'email' => 'medico4@brigadasalud.test', 'especialidad' => 'Pediatría', 'telefono' => '0991000004', 'disponible' => false],
+            ['credencial_cmp' => 'CMP-1005', 'nombres' => 'Dr. Miguel Ángel Suárez', 'apellido' => 'Suárez Rivas', 'cedula' => '0931000052', 'email' => 'medico5@brigadasalud.test', 'especialidad' => 'Odontología', 'telefono' => '0991000005', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1006', 'nombres' => 'Dra. Verónica Chávez', 'apellido' => 'Chávez Loor', 'cedula' => '0931000060', 'email' => 'medico6@brigadasalud.test', 'especialidad' => 'Ginecología', 'telefono' => '0991000006', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1007', 'nombres' => 'Lcda. Gabriela Muñoz', 'apellido' => 'Muñoz Zambrano', 'cedula' => '0931000078', 'email' => 'medico7@brigadasalud.test', 'especialidad' => 'Psicología', 'telefono' => '0991000007', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1008', 'nombres' => 'Lcdo. Kevin Alexander Loor', 'apellido' => 'Loor Cedeño', 'cedula' => '0931000086', 'email' => 'medico8@brigadasalud.test', 'especialidad' => 'Enfermería', 'telefono' => '0991000008', 'disponible' => true],
+            ['credencial_cmp' => 'CMP-1009', 'nombres' => 'Dr. Patricio Andrade Vélez', 'apellido' => 'Andrade Vélez', 'cedula' => '0931000094', 'email' => 'medico9@brigadasalud.test', 'especialidad' => 'Oftalmología', 'telefono' => '0991000009', 'disponible' => true],
         ];
 
         $medicos = [];
         foreach ($datos as $dato) {
+            // Cuenta de acceso propia (rol Medico) para poder entrar desde la app móvil,
+            // igual que hace MedicoController::store al crear un médico desde la web.
+            $usuario = User::firstOrCreate(
+                ['email' => $dato['email']],
+                [
+                    'name' => $dato['nombres'],
+                    'apellido' => $dato['apellido'],
+                    'cedula' => $dato['cedula'],
+                    'password' => Hash::make('password123'),
+                    'activo' => true,
+                ]
+            );
+            $usuario->syncRoles(['Medico']);
+
             $medicos[$dato['credencial_cmp']] = Medico::firstOrCreate(
                 ['credencial_cmp' => $dato['credencial_cmp']],
                 [
+                    'user_id' => $usuario->id,
                     'nombres' => $dato['nombres'],
                     'especialidad_id' => $especialidades[$dato['especialidad']]->id,
                     'telefono' => $dato['telefono'],

@@ -1,4 +1,3 @@
-// database/migrations/2024_01_03_000000_create_especialidades_table.php
 <?php
 
 use Illuminate\Database\Migrations\Migration;
