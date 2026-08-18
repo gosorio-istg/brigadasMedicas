@@ -13,9 +13,9 @@ class DevToolsController extends Controller
 {
     public function resetDemo()
     {
-        if (! app()->environment(['local', 'testing'])) {
+       /*  if (! app()->environment(['local', 'testing'])) {
             return response()->json(['message' => 'Esta herramienta solo está disponible en entornos de desarrollo.'], 403);
-        }
+        } */
 
         if (! Auth::user()?->hasRole('Administrador')) {
             return response()->json(['message' => 'Solo un Administrador puede reiniciar los datos de demostración.'], 403);
@@ -26,11 +26,11 @@ class DevToolsController extends Controller
         return response()->json([
             'message' => 'Datos de demostración reiniciados correctamente.',
             'credenciales' => [
-                'password_compartido' => 'password123',
-                'coordinador' => ['coordinador@brigadasalud.test', 'coordinador2@brigadasalud.test'],
-                'medico' => ['medico1@brigadasalud.test', 'medico2@brigadasalud.test', 'medico3@brigadasalud.test', 'medico4@brigadasalud.test', 'medico5@brigadasalud.test', 'medico6@brigadasalud.test', 'medico7@brigadasalud.test', 'medico8@brigadasalud.test', 'medico9@brigadasalud.test'],
-                'brigadista' => ['brigadista1@brigadasalud.test', 'brigadista2@brigadasalud.test', 'brigadista3@brigadasalud.test'],
-                'ciudadano' => ['ciudadano1@brigadasalud.test', 'ciudadano2@brigadasalud.test'],
+                'password_compartido' => '123',
+                'coordinador' => ['coordinador1@brigadas.com', 'coordinador2@brigadas.com'],
+                'medico' => ['medico1@brigadas.com', 'medico2@brigadas.com', 'medico3@brigadas.com', 'medico4@brigadas.com', 'medico5@brigadas.com', 'medico6@brigadas.com', 'medico7@brigadas.com', 'medico8@brigadas.com', 'medico9@brigadas.com'],
+                'brigadista' => ['brigadista1@brigadas.com', 'brigadista2@brigadas.com', 'brigadista3@brigadas.com'],
+                'ciudadano' => ['ciudadano1@brigadas.com', 'ciudadano2@brigadas.com'],
             ],
         ]);
     }
