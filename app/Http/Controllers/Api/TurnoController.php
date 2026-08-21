@@ -11,10 +11,12 @@ use App\Models\Especialidad;
 use App\Models\Medico;
 use App\Models\Paciente;
 use App\Models\Turno;
+use App\Models\User;
 use App\Services\SyncOutboxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TurnoController extends Controller
 {
@@ -57,19 +59,21 @@ class TurnoController extends Controller
             ], 422);
         }
 
-        $paciente = isset($data['paciente_id'])
-            ? Paciente::findOrFail($data['paciente_id'])
-            : Paciente::firstOrCreate(
-                ['cedula' => $data['paciente']['cedula']],
-                [
-                    'nombres' => $data['paciente']['nombres'],
-                    'apellidos' => $data['paciente']['apellidos'],
-                    'fecha_nacimiento' => $data['paciente']['fecha_nacimiento'],
-                    'sexo' => $data['paciente']['sexo'],
-                    'telefono' => $data['paciente']['telefono'] ?? null,
-                    'sector' => $data['paciente']['sector'] ?? null,
-                ]
-            );
+        $paciente = $this->resolverPaciente($data);
+
+        // La validación declarativa cubre paciente_id; esta comprobación también cubre
+        // cuentas Ciudadano que se convierten en paciente durante esta misma petición.
+        if (Turno::where('brigada_id', $brigada->id)
+            ->where('especialidad_id', $especialidad->id)
+            ->where('paciente_id', $paciente->id)
+            ->where('estado', '!=', 'cancelado')
+            ->exists()) {
+            throw ValidationException::withMessages([
+                isset($data['user_id']) ? 'user_id' : 'paciente_id' => [
+                    'Este ciudadano ya tiene un turno activo para la especialidad seleccionada en esta campaña.',
+                ],
+            ]);
+        }
 
         // lockForUpdate() bloquea las filas de turnos ya existentes de esta brigada+especialidad
         // mientras dura la transacción, evitando que dos registros simultáneos generen el mismo consecutivo.
@@ -148,6 +152,69 @@ class TurnoController extends Controller
             : mb_strtoupper(mb_substr($palabras[0], 0, 3));
 
         return $prefijo.'-'.str_pad((string) $consecutivo, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Obtiene un paciente existente o crea la historia clínica inicial desde una
+     * cuenta Ciudadano. Así una cuenta recién registrada puede recibir un turno
+     * sin obligar al coordinador a volver a escribir todos sus datos.
+     */
+    private function resolverPaciente(array $data): Paciente
+    {
+        if (isset($data['paciente_id'])) {
+            return Paciente::findOrFail($data['paciente_id']);
+        }
+
+        if (isset($data['user_id'])) {
+            $user = User::findOrFail($data['user_id']);
+
+            if (! $user->cedula || ! $user->apellido || ! $user->fecha_nacimiento) {
+                throw ValidationException::withMessages([
+                    'user_id' => [
+                        'El ciudadano debe completar cédula, apellidos y fecha de nacimiento antes de recibir un turno.',
+                    ],
+                ]);
+            }
+
+            $paciente = Paciente::where('user_id', $user->id)
+                ->orWhere('cedula', $user->cedula)
+                ->first();
+
+            if ($paciente) {
+                if (! $paciente->user_id) {
+                    $paciente->update(['user_id' => $user->id]);
+                }
+
+                return $paciente;
+            }
+
+            return Paciente::create([
+                'user_id' => $user->id,
+                'cedula' => $user->cedula,
+                'nombres' => $user->name,
+                'apellidos' => $user->apellido,
+                'fecha_nacimiento' => $user->fecha_nacimiento,
+                // El registro ciudadano actual no solicita sexo. Se conserva como
+                // "otro" hasta que el personal complete el dato en la historia clínica.
+                'sexo' => 'otro',
+                'telefono' => $user->telefono,
+                'sector' => $user->sector,
+            ]);
+        }
+
+        $datosPaciente = $data['paciente'];
+        $user = User::where('cedula', $datosPaciente['cedula'])->first();
+
+        return Paciente::create([
+            'user_id' => $user?->id,
+            'cedula' => $datosPaciente['cedula'],
+            'nombres' => $datosPaciente['nombres'],
+            'apellidos' => $datosPaciente['apellidos'],
+            'fecha_nacimiento' => $datosPaciente['fecha_nacimiento'],
+            'sexo' => $datosPaciente['sexo'],
+            'telefono' => $datosPaciente['telefono'] ?? null,
+            'sector' => $datosPaciente['sector'] ?? null,
+        ]);
     }
 
     private function turnoRealtimePayload(Turno $turno): array

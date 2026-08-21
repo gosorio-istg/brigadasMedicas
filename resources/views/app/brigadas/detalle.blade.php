@@ -67,10 +67,11 @@
               <th>Respuesta</th>
               <th>Especialidad solicitada</th>
               <th>Actualización</th>
+              <th>Turno</th>
             </tr>
           </thead>
           <tbody id="tabla-preinscripciones-body">
-            <tr><td colspan="4">Cargando...</td></tr>
+            <tr><td colspan="5">Cargando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -257,11 +258,11 @@
     const cuerpo = document.getElementById('tabla-preinscripciones-body');
     const resumen = document.getElementById('preinscripciones-resumen');
     const total = document.getElementById('preinscripciones-total');
-    cuerpo.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+    cuerpo.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
 
     const resultado = await Api.get(`/brigadas/${brigadaId}/asistencias`);
     if (!resultado.ok) {
-      cuerpo.innerHTML = `<tr><td colspan="4">${textoSeguro(resultado.message)}</td></tr>`;
+      cuerpo.innerHTML = `<tr><td colspan="5">${textoSeguro(resultado.message)}</td></tr>`;
       resumen.innerHTML = '';
       return;
     }
@@ -280,7 +281,7 @@
     ).join('') || '<span class="page-subtitle">Aún no hay demanda confirmada por especialidad.</span>';
 
     if (!preinscripciones.length) {
-      cuerpo.innerHTML = '<tr><td colspan="4">Todavía no hay respuestas registradas desde la aplicación.</td></tr>';
+      cuerpo.innerHTML = '<tr><td colspan="5">Todavía no hay respuestas registradas desde la aplicación.</td></tr>';
       return;
     }
 
@@ -292,7 +293,35 @@
           ? `<span class="chip ${especialidadChipClass(item.especialidad.nombre)}">${textoSeguro(item.especialidad.nombre)}</span>`
           : '<span class="page-subtitle">No aplica</span>'}</td>
         <td data-label="Actualización">${formatearFecha(item.updated_at)}</td>
+        <td data-label="Turno">${item.turno
+          ? `<span class="chip chip-confirmado">${textoSeguro(item.turno.numero_turno)}</span>`
+          : item.estado === 'asistira' && item.especialidad
+            ? `<button type="button" class="btn btn-primary btn-sm" data-asignar-turno data-user-id="${item.user_id}" data-especialidad-id="${item.especialidad.id}">Asignar turno</button>`
+            : '<span class="page-subtitle">No disponible</span>'}</td>
       </tr>`).join('');
+
+    cuerpo.querySelectorAll('[data-asignar-turno]').forEach(boton => {
+      boton.addEventListener('click', async () => {
+        boton.disabled = true;
+        boton.textContent = 'Asignando...';
+        const respuesta = await Api.post('/turnos', {
+          brigada_id: brigadaId,
+          especialidad_id: parseInt(boton.dataset.especialidadId, 10),
+          user_id: parseInt(boton.dataset.userId, 10),
+        });
+
+        if (!respuesta.ok) {
+          boton.disabled = false;
+          boton.textContent = 'Asignar turno';
+          showToast(respuesta.message, 'error');
+          return;
+        }
+
+        showToast(`Turno ${respuesta.data.numero_turno} asignado. El ciudadano ya puede verlo en la app.`, 'success');
+        await cargarPreinscripciones();
+        cargarTurnos();
+      });
+    });
   }
 
   // ---- Editar campaña ----

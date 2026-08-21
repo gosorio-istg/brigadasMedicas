@@ -54,4 +54,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Preferencia::class);
     }
+
+    // Un ciudadano puede tener una cuenta sin historia clínica hasta que recibe
+    // su primer turno. El vínculo permite mostrar ese turno nuevamente en la app.
+    public function paciente(): HasOne
+    {
+        return $this->hasOne(Paciente::class);
+    }
 }

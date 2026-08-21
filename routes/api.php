@@ -117,6 +117,7 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('permission:turnos.gestionar')->group(function () {
             Route::get('/brigadas/{brigada}/asistencias', [BrigadaAsistenciaController::class, 'index']);
+            Route::get('/turnos/candidatos', [PacienteController::class, 'candidatos']);
             Route::get('/turnos', [TurnoController::class, 'index']);
             Route::post('/turnos', [TurnoController::class, 'store']);
             Route::put('/turnos/{turno}', [TurnoController::class, 'update']);

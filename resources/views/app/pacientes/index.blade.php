@@ -236,7 +236,9 @@
   let turnosCache = [];
   let paginaActual = 1;
   let estadoFiltro = '';
-  let pacienteSeleccionadoId = null;
+  // Puede representar una historia clínica existente o una cuenta Ciudadano que
+  // todavía será vinculada como paciente al asignarle su primer turno.
+  let candidatoSeleccionado = null;
 
   async function init() {
     const brigadasRes = await Api.get('/brigadas?per_page=100');
@@ -514,7 +516,7 @@
       const esExistente = btn.dataset.modoPaciente === 'existente';
       document.getElementById('bloque-paciente-existente').style.display = esExistente ? 'block' : 'none';
       document.getElementById('bloque-paciente-nuevo').style.display = esExistente ? 'none' : 'block';
-      pacienteSeleccionadoId = null;
+      candidatoSeleccionado = null;
       document.getElementById('paciente-seleccionado-texto').textContent = '';
       document.getElementById('buscar-paciente').value = '';
       document.getElementById('resultados-paciente').innerHTML = '';
@@ -559,7 +561,7 @@
     const miId = ++idBusquedaPaciente;
     const contenedor = document.getElementById('resultados-paciente');
 
-    const resultado = await Api.get(`/pacientes?buscar=${encodeURIComponent(termino)}`);
+    const resultado = await Api.get(`/turnos/candidatos?buscar=${encodeURIComponent(termino)}`);
     if (miId !== idBusquedaPaciente) return; // llegó una búsqueda más nueva mientras esperábamos
 
     if (!resultado.ok || !resultado.data.length) {
@@ -567,17 +569,17 @@
       return;
     }
 
-    contenedor.innerHTML = resultado.data.map(p => `
-      <button type="button" class="btn btn-outline btn-sm" data-elegir-paciente="${p.id}" style="justify-content:flex-start">
-        ${p.nombres} ${p.apellidos} — ${p.cedula}
+    contenedor.innerHTML = resultado.data.map((p, indice) => `
+      <button type="button" class="btn btn-outline btn-sm" data-elegir-candidato="${indice}" style="justify-content:flex-start;text-align:left">
+        <span><strong>${p.nombres} ${p.apellidos}</strong> — ${p.cedula}<br><small>${p.origen}</small></span>
       </button>`).join('');
 
-    contenedor.querySelectorAll('[data-elegir-paciente]').forEach(b => {
+    contenedor.querySelectorAll('[data-elegir-candidato]').forEach(b => {
       b.addEventListener('click', () => {
-        pacienteSeleccionadoId = parseInt(b.dataset.elegirPaciente, 10);
-        document.getElementById('paciente-seleccionado-texto').textContent = `Seleccionado: ${b.textContent.trim()}`;
+        candidatoSeleccionado = resultado.data[parseInt(b.dataset.elegirCandidato, 10)];
+        document.getElementById('paciente-seleccionado-texto').textContent = `Seleccionado: ${candidatoSeleccionado.nombres} ${candidatoSeleccionado.apellidos} — ${candidatoSeleccionado.cedula}`;
         document.getElementById('resultados-paciente').innerHTML = '';
-        document.getElementById('buscar-paciente').value = b.textContent.trim();
+        document.getElementById('buscar-paciente').value = `${candidatoSeleccionado.nombres} ${candidatoSeleccionado.apellidos}`;
       });
     });
   }
@@ -596,11 +598,15 @@
     const cuerpo = { brigada_id: parseInt(brigadaId, 10), especialidad_id: parseInt(especialidadId, 10) };
 
     if (modoExistente) {
-      if (!pacienteSeleccionadoId) {
-        showToast('Busca y selecciona un paciente de la lista.', 'error');
+      if (!candidatoSeleccionado) {
+        showToast('Busca y selecciona un paciente o ciudadano de la lista.', 'error');
         return;
       }
-      cuerpo.paciente_id = pacienteSeleccionadoId;
+      if (candidatoSeleccionado.paciente_id) {
+        cuerpo.paciente_id = candidatoSeleccionado.paciente_id;
+      } else {
+        cuerpo.user_id = candidatoSeleccionado.user_id;
+      }
     } else {
       cuerpo.paciente = {
         cedula: document.getElementById('np-cedula').value.trim(),
@@ -638,7 +644,7 @@
 
     closeModal('modal-nuevo-turno');
     this.reset();
-    pacienteSeleccionadoId = null;
+    candidatoSeleccionado = null;
     document.getElementById('paciente-seleccionado-texto').textContent = '';
     document.getElementById('resultados-paciente').innerHTML = '';
 
