@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateMiAsistenciaRequest;
+use App\Http\Resources\CitizenCampaignResource;
 use App\Models\Brigada;
 use App\Models\BrigadaAsistencia;
-use App\Http\Resources\CitizenCampaignResource;
 use Illuminate\Http\Request;
 
 class BrigadaAsistenciaController extends Controller
@@ -16,7 +16,9 @@ class BrigadaAsistenciaController extends Controller
     {
         $campaigns = Brigada::with([
             'especialidades',
-            'asistencias' => fn ($query) => $query->where('user_id', $request->user()->id),
+            'asistencias' => fn ($query) => $query
+                ->where('user_id', $request->user()->id)
+                ->with('especialidad:id,nombre'),
         ])
             ->whereIn('estado', ['programada', 'en_curso'])
             ->orderByDesc('fecha')
@@ -27,11 +29,18 @@ class BrigadaAsistenciaController extends Controller
 
     public function index(Brigada $brigada)
     {
-        $items = $brigada->asistencias()->with('user:id,name,apellido')->latest('updated_at')->get()
+        $items = $brigada->asistencias()
+            ->with(['user:id,name,apellido', 'especialidad:id,nombre'])
+            ->latest('updated_at')
+            ->get()
             ->map(fn (BrigadaAsistencia $item) => [
                 'id' => $item->id,
                 'nombre' => trim($item->user->name.' '.($item->user->apellido ?? '')),
                 'estado' => $item->estado,
+                'especialidad' => $item->especialidad ? [
+                    'id' => $item->especialidad->id,
+                    'nombre' => $item->especialidad->nombre,
+                ] : null,
                 'updated_at' => $item->updated_at,
             ]);
 
@@ -42,20 +51,31 @@ class BrigadaAsistenciaController extends Controller
     {
         $asistencia = BrigadaAsistencia::whereBelongsTo($brigada)->whereBelongsTo($request->user())->first();
 
-        return response()->json(['data' => $asistencia]);
+        return response()->json(['data' => $asistencia?->load('especialidad:id,nombre')]);
     }
 
     public function update(UpdateMiAsistenciaRequest $request, Brigada $brigada)
     {
+        $estado = $request->validated('estado');
+
         $asistencia = BrigadaAsistencia::updateOrCreate(
             ['brigada_id' => $brigada->id, 'user_id' => $request->user()->id],
-            ['estado' => $request->validated('estado')]
+            [
+                'estado' => $estado,
+                // Una especialidad solo representa demanda real cuando el ciudadano
+                // confirmó que asistirá; las demás respuestas no deben inflar métricas.
+                'especialidad_id' => $estado === 'asistira'
+                    ? $request->validated('especialidad_id')
+                    : null,
+            ]
         );
+
+        $asistencia->load('especialidad:id,nombre');
 
         return response()->json([
             'data' => $asistencia,
             'message' => match ($asistencia->estado) {
-                'asistira' => 'Gracias por confirmar. Te esperamos en la campaña.',
+                'asistira' => "Preinscripción confirmada para {$asistencia->especialidad->nombre}. El turno se asignará al validar tu llegada.",
                 'tal_vez' => 'Guardamos tu respuesta. Puedes confirmarla cuando estés seguro.',
                 'no_asistira' => 'Gracias por avisarnos. Puedes cambiar tu respuesta si luego puedes asistir.',
             },

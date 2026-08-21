@@ -20,6 +20,10 @@ class CitizenCampaignResource extends JsonResource
             'estado' => $this->estado,
             'especialidades' => EspecialidadResource::collection($this->whenLoaded('especialidades')),
             'mi_asistencia' => $attendance?->estado,
+            'mi_especialidad' => $attendance?->especialidad ? [
+                'id' => $attendance->especialidad->id,
+                'nombre' => $attendance->especialidad->nombre,
+            ] : null,
             'confirmado_at' => $attendance?->updated_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
         ];

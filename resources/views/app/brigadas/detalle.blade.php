@@ -51,6 +51,34 @@
 
   <section class="section-block">
     <div class="data-panel">
+      <div class="data-panel-header">
+        <div>
+          <div class="data-panel-title">Preinscripciones desde la app</div>
+          <div class="data-panel-caption">Demanda anticipada por especialidad. Todavía no representa turnos asignados.</div>
+        </div>
+        <span class="chip chip-confirmado" id="preinscripciones-total">0 confirmadas</span>
+      </div>
+      <div id="preinscripciones-resumen" style="display:flex;flex-wrap:wrap;gap:8px;padding:0 var(--space-lg) var(--space-md)"></div>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ciudadano</th>
+              <th>Respuesta</th>
+              <th>Especialidad solicitada</th>
+              <th>Actualización</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-preinscripciones-body">
+            <tr><td colspan="4">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="data-panel">
       <div class="data-panel-header"><div><div class="data-panel-title">Pacientes y turnos</div><div class="data-panel-caption">Actualiza el resultado de atención sin salir de la campaña.</div></div></div>
       <div class="table-responsive">
       <table class="data-table" id="tabla-pacientes-campana">
@@ -163,6 +191,7 @@
     pintarCampana();
     pintarPacientes(brigadaActual.especialidades || []);
     cargarMedicosAsignados();
+    cargarPreinscripciones();
   }
 
   function pintarCampana() {
@@ -208,6 +237,63 @@
 
   document.getElementById('btn-iniciar-campana').addEventListener('click', () => cambiarEstadoCampana('en_curso'));
   document.getElementById('btn-finalizar-campana').addEventListener('click', () => cambiarEstadoCampana('finalizada'));
+
+  // ---- Preinscripciones ciudadanas ----
+  function textoSeguro(valor) {
+    const elemento = document.createElement('span');
+    elemento.textContent = valor ?? '';
+    return elemento.innerHTML;
+  }
+
+  function etiquetaRespuestaAsistencia(estado) {
+    return { asistira: 'Asistirá', tal_vez: 'Tal vez', no_asistira: 'No asistirá' }[estado] || estado;
+  }
+
+  function claseRespuestaAsistencia(estado) {
+    return estado === 'asistira' ? 'chip-confirmado' : estado === 'no_asistira' ? 'chip-cancelado' : 'chip-pendiente';
+  }
+
+  async function cargarPreinscripciones() {
+    const cuerpo = document.getElementById('tabla-preinscripciones-body');
+    const resumen = document.getElementById('preinscripciones-resumen');
+    const total = document.getElementById('preinscripciones-total');
+    cuerpo.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+
+    const resultado = await Api.get(`/brigadas/${brigadaId}/asistencias`);
+    if (!resultado.ok) {
+      cuerpo.innerHTML = `<tr><td colspan="4">${textoSeguro(resultado.message)}</td></tr>`;
+      resumen.innerHTML = '';
+      return;
+    }
+
+    const preinscripciones = resultado.data || [];
+    const confirmadas = preinscripciones.filter(item => item.estado === 'asistira');
+    total.textContent = `${confirmadas.length} confirmada${confirmadas.length === 1 ? '' : 's'}`;
+
+    const demanda = confirmadas.reduce((conteo, item) => {
+      const nombre = item.especialidad?.nombre || 'Sin especialidad';
+      conteo[nombre] = (conteo[nombre] || 0) + 1;
+      return conteo;
+    }, {});
+    resumen.innerHTML = Object.entries(demanda).map(([nombre, cantidad]) =>
+      `<span class="chip ${especialidadChipClass(nombre)}">${textoSeguro(nombre)} · ${cantidad}</span>`
+    ).join('') || '<span class="page-subtitle">Aún no hay demanda confirmada por especialidad.</span>';
+
+    if (!preinscripciones.length) {
+      cuerpo.innerHTML = '<tr><td colspan="4">Todavía no hay respuestas registradas desde la aplicación.</td></tr>';
+      return;
+    }
+
+    cuerpo.innerHTML = preinscripciones.map(item => `
+      <tr>
+        <td data-label="Ciudadano"><strong>${textoSeguro(item.nombre)}</strong></td>
+        <td data-label="Respuesta"><span class="chip ${claseRespuestaAsistencia(item.estado)}">${etiquetaRespuestaAsistencia(item.estado)}</span></td>
+        <td data-label="Especialidad">${item.especialidad
+          ? `<span class="chip ${especialidadChipClass(item.especialidad.nombre)}">${textoSeguro(item.especialidad.nombre)}</span>`
+          : '<span class="page-subtitle">No aplica</span>'}</td>
+        <td data-label="Actualización">${formatearFecha(item.updated_at)}</td>
+      </tr>`).join('');
+  }
 
   // ---- Editar campaña ----
   let editarEspecialidadesCatalogo = [];

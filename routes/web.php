@@ -24,6 +24,10 @@ Route::view('/login', 'auth.login')->name('login');
 Route::view('/recuperar-password', 'auth.recuperar-password')->name('password.request');
 Route::view('/seleccion-rol', 'auth.seleccion-rol')->name('seleccion-rol');
 
+// Presentación pública para la sustentación académica. Se mantiene fuera del
+// panel para que el jurado pueda abrirla sin iniciar sesión.
+Route::view('/pre', 'presentation')->name('presentation');
+
 // La ruta pública mantiene estable el QR aunque cambie el dominio del sistema.
 Route::get('/descargas/brigadas-medicas-android.apk', DescargaAndroidController::class)
     ->name('android.apk.download');

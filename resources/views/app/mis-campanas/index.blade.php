@@ -56,6 +56,10 @@
   function campaignCard(campaign) {
     const response = campaign.mi_asistencia;
     const specialties = (campaign.especialidades || []).map(item => `<span class="chip">${item.nombre}</span>`).join('');
+    const selectedSpecialty = campaign.mi_especialidad?.id ?? '';
+    const specialtyOptions = (campaign.especialidades || []).map(item =>
+      `<option value="${item.id}" ${item.id === selectedSpecialty ? 'selected' : ''}>${item.nombre}</option>`
+    ).join('');
     return `<article class="brigada-card">
       <div class="brigada-card-header">
         <div><span class="page-subtitle">Campaña médica</span><h3 class="brigada-card-title">${campaign.nombre}</h3></div>
@@ -67,6 +71,11 @@
         <span><span class="material-symbols-rounded">location_on</span> ${campaign.ubicacion}</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin:12px 0">${specialties}</div>
+      <label class="form-label" for="especialidad-campana-${campaign.id}">Especialidad de interés</label>
+      <select class="form-control" id="especialidad-campana-${campaign.id}" style="margin-bottom:12px">
+        <option value="">Selecciona una especialidad</option>
+        ${specialtyOptions}
+      </select>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-primary btn-sm" onclick="confirmAttendance(${campaign.id}, 'asistira')">Asistiré</button>
         <button class="btn btn-outline btn-sm" onclick="confirmAttendance(${campaign.id}, 'tal_vez')">Tal vez</button>
@@ -92,12 +101,23 @@
   }
 
   async function confirmAttendance(id, state) {
-    const result = await Api.put(`/brigadas/${id}/mi-asistencia`, { estado: state });
+    const specialtyId = state === 'asistira'
+      ? parseInt(document.getElementById(`especialidad-campana-${id}`)?.value, 10) || null
+      : null;
+    if (state === 'asistira' && !specialtyId) {
+      showToast('Selecciona la especialidad en la que deseas recibir atención.', 'warning');
+      return;
+    }
+
+    const result = await Api.put(`/brigadas/${id}/mi-asistencia`, {
+      estado: state,
+      especialidad_id: specialtyId,
+    });
     if (!result.ok) { showToast(result.message, 'error'); return; }
     const message = result.extra?.message || 'Tu respuesta se guardó correctamente.';
     const feedback = document.getElementById('attendance-feedback');
     feedback.style.display = 'block';
-    feedback.innerHTML = `<div style="display:flex;gap:12px;align-items:center"><span class="material-symbols-rounded" style="color:var(--secondary);font-size:32px">check_circle</span><div><strong>${message}</strong><p class="page-subtitle" style="margin:4px 0 0">Puedes cambiar tu respuesta cuando lo necesites. La confirmación no crea un turno de atención.</p></div></div>`;
+    feedback.innerHTML = `<div style="display:flex;gap:12px;align-items:center"><span class="material-symbols-rounded" style="color:var(--secondary);font-size:32px">check_circle</span><div><strong>${message}</strong><p class="page-subtitle" style="margin:4px 0 0">Puedes cambiar tu respuesta cuando lo necesites. La preinscripción permite planificar la demanda; el turno se asigna al validar tu llegada.</p></div></div>`;
     showToast(message, 'success');
     await loadMyCampaigns();
     feedback.scrollIntoView({ behavior: 'smooth', block: 'start' });

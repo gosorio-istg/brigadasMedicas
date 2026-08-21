@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Brigada;
+use App\Models\BrigadaAsistencia;
 use App\Models\Comunidad;
 use App\Models\ConfiguracionSistema;
 use App\Models\Especialidad;
@@ -26,9 +27,10 @@ class DemoDataSeeder extends Seeder
     {
         $especialidades = $this->sembrarEspecialidades();
         $usuarios = $this->sembrarUsuarios();
-        $this->sembrarCiudadanos();
+        $ciudadanos = $this->sembrarCiudadanos();
         $medicos = $this->sembrarMedicos($especialidades);
         $brigadas = $this->sembrarBrigadas($especialidades, $usuarios, $medicos);
+        $this->sembrarPreinscripciones($brigadas, $especialidades, $ciudadanos);
         $this->sembrarBrigadistas($brigadas, $usuarios);
         $pacientes = $this->sembrarPacientes();
         $this->sembrarTurnos($brigadas, $especialidades, $pacientes, $medicos, $usuarios);
@@ -57,13 +59,14 @@ class DemoDataSeeder extends Seeder
 
     // Cuentas de Ciudadano: para probar registro/login desde la app móvil, solicitar
     // campañas y confirmar asistencia (ninguna de las otras siembras crea este rol).
-    private function sembrarCiudadanos(): void
+    private function sembrarCiudadanos(): array
     {
         $datos = [
             ['email' => 'ciudadano1@brigadas.com', 'name' => 'Rosa', 'apellido' => 'Vera Cedeño', 'cedula' => '0911111116', 'sector' => 'Cooperativa Suárez'],
             ['email' => 'ciudadano2@brigadas.com', 'name' => 'Manuel', 'apellido' => 'Reyes Baque', 'cedula' => '0922222227', 'sector' => 'Isla Trinitaria'],
         ];
 
+        $ciudadanos = [];
         foreach ($datos as $dato) {
             $usuario = $this->resolveUsuario($dato['email'], $dato['cedula'], [
                 'name' => $dato['name'],
@@ -73,6 +76,46 @@ class DemoDataSeeder extends Seeder
                 'activo' => true,
             ]);
             $usuario->syncRoles(['Ciudadano']);
+            $ciudadanos[$dato['email']] = $usuario;
+        }
+
+        return $ciudadanos;
+    }
+
+    /**
+     * Preinscripciones ciudadanas para visualizar demanda antes de la jornada.
+     * No se crean turnos: estos se asignan cuando el equipo valida la llegada.
+     */
+    private function sembrarPreinscripciones(array $brigadas, array $especialidades, array $ciudadanos): void
+    {
+        $datos = [
+            [
+                'brigada' => 'Brigada Sector Suárez',
+                'ciudadano' => 'ciudadano1@brigadas.com',
+                'estado' => 'asistira',
+                'especialidad' => 'Medicina General',
+            ],
+            [
+                'brigada' => 'Brigada Isla Trinitaria',
+                'ciudadano' => 'ciudadano2@brigadas.com',
+                'estado' => 'tal_vez',
+                'especialidad' => null,
+            ],
+        ];
+
+        foreach ($datos as $dato) {
+            BrigadaAsistencia::updateOrCreate(
+                [
+                    'brigada_id' => $brigadas[$dato['brigada']]->id,
+                    'user_id' => $ciudadanos[$dato['ciudadano']]->id,
+                ],
+                [
+                    'estado' => $dato['estado'],
+                    'especialidad_id' => $dato['especialidad']
+                        ? $especialidades[$dato['especialidad']]->id
+                        : null,
+                ]
+            );
         }
     }
 
