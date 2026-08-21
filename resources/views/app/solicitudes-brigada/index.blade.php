@@ -3,21 +3,40 @@
 @section('titulo', 'Solicitudes de brigada')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Solicitudes de brigada</h1>
-      <p class="page-subtitle">Revisa las necesidades enviadas desde la aplicación móvil</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon module-hero-icon--orange"><span class="material-symbols-rounded">inbox</span></span>
+      <div>
+        <span class="module-eyebrow">Demanda comunitaria</span>
+        <h1>Solicitudes de brigada</h1>
+        <p class="page-subtitle">Prioriza necesidades, registra el seguimiento y vincula las solicitudes aprobadas con una campaña.</p>
+      </div>
     </div>
-    <select id="filtro-estado" class="form-control" style="max-width:220px" aria-label="Filtrar por estado">
+  </header>
+
+  <div class="workflow-strip" aria-label="Flujo de gestión de solicitudes">
+    <div class="workflow-step"><span class="workflow-step-number">1</span><div><strong>Revisa</strong><small>Valida sector, contacto y necesidad.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">2</span><div><strong>Gestiona</strong><small>Documenta el análisis del coordinador.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">3</span><div><strong>Vincula</strong><small>Asocia una campaña cuando sea aprobada.</small></div></div>
+  </div>
+
+  <div class="module-toolbar">
+    <div class="form-group" style="min-width:min(100%,260px)">
+      <label class="module-toolbar-label" for="filtro-estado">Estado de la solicitud</label>
+      <select id="filtro-estado" class="form-control" aria-label="Filtrar por estado">
       <option value="">Todos los estados</option>
       <option value="pendiente">Pendientes</option>
       <option value="en_revision">En revisión</option>
       <option value="aprobada">Aprobadas</option>
       <option value="rechazada">Rechazadas</option>
-    </select>
-  </header>
+      </select>
+    </div>
+    <p class="page-subtitle" style="margin-left:auto">Empieza por las pendientes y deja una nota antes de cambiar su estado.</p>
+  </div>
 
-  <div class="table-responsive">
+  <section class="data-panel">
+    <div class="data-panel-header"><div><div class="data-panel-title">Bandeja de solicitudes</div><div class="data-panel-caption" id="resumen-solicitudes">Cargando solicitudes...</div></div></div>
+    <div class="table-responsive">
     <table class="data-table">
       <thead>
         <tr>
@@ -33,15 +52,16 @@
         <tr><td colspan="6">Cargando...</td></tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="pagination">
+    <div class="pagination">
     <span id="paginacion-texto"></span>
     <div class="pagination-btns">
       <button class="btn btn-outline btn-sm" id="btn-anterior" disabled>Anterior</button>
       <button class="btn btn-outline btn-sm" id="btn-siguiente" disabled>Siguiente</button>
     </div>
-  </div>
+    </div>
+  </section>
 @endsection
 
 @section('modals')
@@ -125,9 +145,12 @@
     }
     if (!resultado.data.length) {
       cuerpo.innerHTML = '<tr><td colspan="6">No hay solicitudes con este filtro.</td></tr>';
+      document.getElementById('resumen-solicitudes').textContent = 'No hay solicitudes con el estado seleccionado.';
       pintarPaginacion(resultado.meta);
       return;
     }
+
+    document.getElementById('resumen-solicitudes').textContent = `${resultado.meta?.total ?? resultado.data.length} solicitudes encontradas`;
 
     cuerpo.innerHTML = resultado.data.map(s => `
       <tr>

@@ -3,13 +3,16 @@
 @section('titulo', 'Detalle de campaña')
 
 @section('content')
-  <header class="page-header">
-    <a href="{{ route('brigadas.index') }}" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-sm)">
-      <span class="material-symbols-rounded">arrow_back</span> Volver a Campañas
-    </a>
-    <div class="flex-between">
-      <h1 id="campana-nombre">Cargando...</h1>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">clinical_notes</span></span>
+      <div>
+        <a href="{{ route('brigadas.index') }}" class="module-eyebrow"><span class="material-symbols-rounded" style="font-size:15px">arrow_back</span> Campañas</a>
+        <h1 id="campana-nombre">Cargando...</h1>
+        <p class="page-subtitle">Coordina el estado, personal y atención de esta jornada.</p>
+      </div>
+    </div>
+      <div class="module-hero-actions">
         <button type="button" class="btn btn-outline" id="btn-editar-campana">
           <span class="material-symbols-rounded">edit</span> Editar
         </button>
@@ -26,7 +29,6 @@
           <span class="material-symbols-rounded">add</span> Registrar turno
         </a>
       </div>
-    </div>
   </header>
 
   <div class="card" style="margin-bottom:var(--space-lg)">
@@ -48,8 +50,9 @@
   </section>
 
   <section class="section-block">
-    <h2 class="section-title">Pacientes asignados</h2>
-    <div class="table-responsive">
+    <div class="data-panel">
+      <div class="data-panel-header"><div><div class="data-panel-title">Pacientes y turnos</div><div class="data-panel-caption">Actualiza el resultado de atención sin salir de la campaña.</div></div></div>
+      <div class="table-responsive">
       <table class="data-table" id="tabla-pacientes-campana">
         <thead>
           <tr>
@@ -65,6 +68,7 @@
           <tr><td colspan="6">Cargando...</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </section>
 @endsection

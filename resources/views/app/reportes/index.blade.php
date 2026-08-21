@@ -3,15 +3,21 @@
 @section('titulo', 'Reportes')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Reportes</h1>
-      <p class="page-subtitle">Indicadores de atención de las campañas médicas</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">monitoring</span></span>
+      <div>
+        <span class="module-eyebrow">Resultados e impacto</span>
+        <h1>Reportes</h1>
+        <p class="page-subtitle">Analiza cobertura, atenciones y tiempos de espera para mejorar las próximas jornadas.</p>
+      </div>
     </div>
-    <select class="form-control" id="filtro-brigada" style="max-width:280px">
-      <option value="">Todas las campañas</option>
-    </select>
   </header>
+
+  <div class="module-toolbar">
+    <div class="form-group" style="width:min(100%,360px)"><label class="module-toolbar-label" for="filtro-brigada">Alcance del reporte</label><select class="form-control" id="filtro-brigada"><option value="">Todas las campañas</option></select></div>
+    <div class="page-subtitle" style="margin-left:auto">Los indicadores se actualizan automáticamente al cambiar la campaña.</div>
+  </div>
 
   <section class="section-block">
     <div class="stat-grid" id="stat-grid">
@@ -23,7 +29,7 @@
 
   <section class="section-block">
     <h2 class="section-title">Atenciones por especialidad</h2>
-    <div class="card">
+    <div class="card" style="border-radius:18px;box-shadow:var(--shadow-sm)">
       <div class="chart-bars" id="chart-especialidades">
         <p class="page-subtitle">Cargando...</p>
       </div>
@@ -32,7 +38,9 @@
 
   <section class="section-block">
     <h2 class="section-title">Distribución por sector</h2>
-    <div class="table-responsive">
+    <div class="data-panel">
+      <div class="data-panel-header"><div><div class="data-panel-title">Cobertura por sector</div><div class="data-panel-caption">Compara turnos, atenciones y pacientes únicos.</div></div></div>
+      <div class="table-responsive">
       <table class="data-table" id="tabla-sectores">
         <thead>
           <tr>
@@ -46,6 +54,7 @@
           <tr><td colspan="4">Cargando...</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </section>
 @endsection

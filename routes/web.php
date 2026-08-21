@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DescargaAndroidController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +23,10 @@ Route::redirect('/', '/dashboard');
 Route::view('/login', 'auth.login')->name('login');
 Route::view('/recuperar-password', 'auth.recuperar-password')->name('password.request');
 Route::view('/seleccion-rol', 'auth.seleccion-rol')->name('seleccion-rol');
+
+// La ruta pública mantiene estable el QR aunque cambie el dominio del sistema.
+Route::get('/descargas/brigadas-medicas-android.apk', DescargaAndroidController::class)
+    ->name('android.apk.download');
 
 Route::view('/dashboard', 'app.dashboard')->name('dashboard');
 Route::view('/mis-campanas', 'app.mis-campanas.index')->name('mis-campanas.index');

@@ -3,14 +3,27 @@
 @section('titulo', 'Campañas')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Campañas</h1>
-      <p class="page-subtitle">Campañas médicas comunitarias programadas</p>
+  <header class="page-header campanas-page-header">
+    <div class="campanas-page-heading">
+      <span class="campanas-page-icon" aria-hidden="true">
+        <span class="material-symbols-rounded">campaign</span>
+      </span>
+      <div>
+        <span class="page-eyebrow">Gestión operativa</span>
+        <h1>Campañas médicas</h1>
+        <p class="page-subtitle" id="resumen-campanas">Organiza y supervisa las jornadas de atención comunitaria.</p>
+      </div>
     </div>
+
+    {{-- En escritorio la acción principal debe formar parte de la cabecera. En móvil
+         se conserva el FAB porque queda al alcance natural del pulgar. --}}
+    <a href="{{ route('brigadas.crear') }}" class="btn btn-primary campanas-header-action">
+      <span class="material-symbols-rounded">add</span>
+      Nueva campaña
+    </a>
   </header>
 
-  <nav class="filter-bar" data-filter-group="brigadas" aria-label="Filtrar campañas">
+  <nav class="filter-bar campanas-filter-bar" data-filter-group="brigadas" aria-label="Filtrar campañas">
     <button class="filter-chip is-active" data-filter="all" data-label="Todas">Todas</button>
     <button class="filter-chip" data-filter="programada" data-label="Programadas">Programadas</button>
     <button class="filter-chip" data-filter="en_curso" data-label="En curso">En curso</button>
@@ -18,32 +31,25 @@
     <button class="filter-chip" data-filter="cancelada" data-label="Canceladas">Canceladas</button>
   </nav>
 
-  <div class="card-grid" id="lista-brigadas">
-    <div class="card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div>
+  <div class="campanas-grid" id="lista-brigadas" aria-live="polite">
+    @for ($i = 0; $i < 3; $i++)
+      <div class="card campana-card-skeleton"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div>
+    @endfor
   </div>
 
   <a href="{{ route('brigadas.crear') }}" class="bottom-nav-fab" aria-label="Nueva campaña">
-    <span class="material-symbols-rounded">add</span>
-  </a>
-  <a href="{{ route('brigadas.crear') }}" class="fab" aria-label="Nueva campaña" style="display:none" id="fab-desktop">
     <span class="material-symbols-rounded">add</span>
   </a>
 @endsection
 
 @section('scripts')
 <script>
-  // El FAB fijo abajo a la derecha (versión "fab", no "bottom-nav-fab") se muestra
-  // solo en desktop, donde el bottom-nav ya no aparece (ver media query >=1024px en el CSS).
-  if (window.matchMedia('(min-width: 1024px)').matches) {
-    document.getElementById('fab-desktop').style.display = 'flex';
-  }
-
   let brigadasCache = [];
   const MESES_ABREV = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
   function partesFecha(fechaIso) {
     const [anio, mes, dia] = fechaIso.split('T')[0].split('-');
-    return { dia: parseInt(dia, 10), mes: MESES_ABREV[parseInt(mes, 10) - 1] };
+    return { dia: parseInt(dia, 10), mes: MESES_ABREV[parseInt(mes, 10) - 1], anio };
   }
 
   async function cargarBrigadas() {
@@ -63,6 +69,7 @@
 
     pintarBrigadas();
     pintarContadoresFiltro();
+    pintarResumenCampanas();
   }
 
   function estaActiva(brigada) {
@@ -75,6 +82,14 @@
       const total = filtro === 'all' ? brigadasCache.length : brigadasCache.filter(b => b.estado === filtro).length;
       chip.innerHTML = `${chip.dataset.label} <span class="filter-chip-count">(${total})</span>`;
     });
+  }
+
+  // Resume la operación en una frase breve sin agregar otra fila de tarjetas estadísticas.
+  function pintarResumenCampanas() {
+    const activas = brigadasCache.filter(b => b.estado === 'programada' || b.estado === 'en_curso').length;
+    const total = brigadasCache.length;
+    document.getElementById('resumen-campanas').textContent =
+      `${total} campaña${total === 1 ? '' : 's'} registrada${total === 1 ? '' : 's'} · ${activas} activa${activas === 1 ? '' : 's'} o próxima${activas === 1 ? '' : 's'}`;
   }
 
   function pintarBrigadas() {
@@ -94,29 +109,44 @@
           <div class="campana-fecha-badge">
             <span class="campana-fecha-dia">${fecha.dia}</span>
             <span class="campana-fecha-mes">${fecha.mes}</span>
+            <span class="campana-fecha-anio">${fecha.anio}</span>
           </div>
           <div class="campana-card-heading">
+            <span class="campana-card-kicker">Jornada comunitaria</span>
             <h3 class="campana-card-title">${b.nombre}</h3>
-            <span class="campana-card-ubicacion"><span class="material-symbols-rounded">location_on</span>${b.ubicacion}</span>
           </div>
           <span class="chip ${estadoBrigadaChipClass(b.estado)} ${enVivo ? 'chip-vivo' : ''}">
             ${enVivo ? '<span class="punto-vivo"></span>' : ''}${estadoBrigadaLabel(b.estado)}
           </span>
         </div>
 
+        <div class="campana-card-ubicacion">
+          <span class="campana-meta-icon"><span class="material-symbols-rounded">location_on</span></span>
+          <span><small>Ubicación</small><strong>${b.ubicacion}</strong></span>
+        </div>
+
+        <span class="campana-card-section-label">Especialidades disponibles</span>
         <div class="campana-card-especialidades">
           ${chipsVisibles || '<span class="page-subtitle">Sin especialidades asignadas</span>'}
           ${restantes > 0 ? `<span class="chip chip-especialidad-otra">+${restantes}</span>` : ''}
         </div>
 
         <div class="campana-card-footer">
-          <span class="campana-card-capacidad">
-            <span class="material-symbols-rounded">groups</span>
-            ${especialidades.length} especialidad${especialidades.length === 1 ? '' : 'es'} · ${totalCupos} cupos en total
-          </span>
+          <div class="campana-card-metricas">
+            <span class="campana-card-metrica">
+              <span class="material-symbols-rounded">medical_services</span>
+              <span><strong>${especialidades.length}</strong><small>Especialidades</small></span>
+            </span>
+            <span class="campana-card-metrica">
+              <span class="material-symbols-rounded">groups</span>
+              <span><strong>${totalCupos}</strong><small>Cupos totales</small></span>
+            </span>
+          </div>
           <div class="campana-card-acciones">
-            <a href="/brigadas/${b.id}" class="btn btn-outline btn-sm">Ver detalles</a>
-            ${estaActiva(b) ? `<a href="/pacientes?brigada_id=${b.id}&nuevo_turno=1" class="btn btn-primary btn-sm">Registrar turno</a>` : ''}
+            <a href="/brigadas/${b.id}" class="btn btn-outline btn-sm">
+              Ver detalles <span class="material-symbols-rounded">arrow_outward</span>
+            </a>
+            ${estaActiva(b) ? `<a href="/pacientes?brigada_id=${b.id}&nuevo_turno=1" class="btn btn-primary btn-sm"><span class="material-symbols-rounded">add_circle</span> Registrar turno</a>` : ''}
           </div>
         </div>
       </article>`;

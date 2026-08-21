@@ -3,12 +3,65 @@
 @section('titulo', 'Configuración')
 
 @section('content')
-  <header class="page-header">
-    <h1>Configuración</h1>
-    <p class="page-subtitle">Tu cuenta, catálogo de especialidades y preferencias de notificación</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">settings</span></span>
+      <div>
+        <span class="module-eyebrow">Preferencias del sistema</span>
+        <h1>Configuración</h1>
+        <p class="page-subtitle">Administra tu cuenta y, según tus permisos, los catálogos y opciones globales de la plataforma.</p>
+      </div>
+    </div>
   </header>
 
-  <section class="section-block">
+  <nav class="settings-nav" aria-label="Secciones de configuración">
+    <a href="#seccion-cuenta">Mi cuenta</a>
+    <a href="#seccion-notificaciones">Notificaciones</a>
+    <a href="#seccion-descarga-android" data-requiere-permiso="configuracion.gestionar">Aplicación Android</a>
+    <a href="#seccion-especialidades" data-requiere-permiso="configuracion.gestionar">Especialidades</a>
+    <a href="#seccion-demo">Desarrollo</a>
+  </nav>
+
+  <section class="section-block" id="seccion-descarga-android" style="display:none">
+    <h2 class="section-title">Aplicación móvil Android</h2>
+    <div class="config-app-card">
+      <div class="config-app-form">
+        <span class="config-app-icon" aria-hidden="true"><span class="material-symbols-rounded">android</span></span>
+        <div>
+          <h3>Enlace público de descarga</h3>
+          <p class="page-subtitle">Esta dirección genera el QR que aparece en el inicio de sesión. Puede apuntar al APK en tu servidor, GitHub, Drive u otro alojamiento HTTPS.</p>
+        </div>
+
+        <form id="form-configuracion-android">
+          <div class="form-group">
+            <label class="form-label" for="apk-android-url">URL del APK para Android</label>
+            <input type="text" id="apk-android-url" class="form-control" placeholder="/descargas/brigadas-medicas-android.apk" autocomplete="url">
+            <span class="form-error-msg" id="error-apk-android-url" hidden></span>
+            <small class="form-help">Usa la ruta interna incluida o una URL HTTPS externa. Déjalo vacío para retirar temporalmente el QR.</small>
+          </div>
+          <button type="submit" class="btn btn-primary" id="btn-guardar-configuracion-android">
+            <span class="material-symbols-rounded">save</span> Guardar enlace
+          </button>
+        </form>
+      </div>
+
+      <aside class="config-app-preview" aria-label="Vista previa del QR Android">
+        <span class="config-app-preview-label">Vista previa en el login</span>
+        <div class="config-app-qr-frame" id="config-app-qr-frame">
+          <img src="" alt="Vista previa del código QR Android" id="config-app-qr" hidden>
+          <div class="config-app-qr-empty" id="config-app-qr-empty">
+            <span class="material-symbols-rounded">qr_code_2</span>
+            <span>Configura un enlace para generar el QR.</span>
+          </div>
+        </div>
+        <a href="#" id="config-app-link" class="config-app-link" target="_blank" rel="noopener noreferrer" hidden>
+          Probar descarga <span class="material-symbols-rounded">open_in_new</span>
+        </a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section-block" id="seccion-cuenta">
     <h2 class="section-title">Mi cuenta</h2>
     <div class="card" style="max-width:560px">
       <form id="form-cuenta">
@@ -78,7 +131,7 @@
   </section>
 {{--   @endif --}}
 
-  <section class="section-block">
+  <section class="section-block" id="seccion-notificaciones">
     <h2 class="section-title">Preferencias de notificación</h2>
     <div class="card" style="max-width:560px">
       <div class="detail-row">
@@ -120,6 +173,75 @@
 <script>
   const usuarioActual = getUser();
   const puedeGestionarEspecialidades = hasPermission('brigadas.gestionar');
+  const puedeGestionarConfiguracion = hasPermission('configuracion.gestionar');
+
+  // Pinta la vista previa con nodos ya existentes para no insertar la URL configurada
+  // como HTML. Esto evita que un valor externo pueda alterar la estructura de la página.
+  function pintarConfiguracionAndroid(configuracion) {
+    const tieneUrl = !!configuracion?.apk_android_url;
+    const imagen = document.getElementById('config-app-qr');
+    const vacio = document.getElementById('config-app-qr-empty');
+    const enlace = document.getElementById('config-app-link');
+
+    document.getElementById('apk-android-url').value = configuracion?.apk_android_url ?? '';
+    imagen.hidden = !tieneUrl;
+    vacio.hidden = tieneUrl;
+    enlace.hidden = !tieneUrl;
+
+    if (tieneUrl) {
+      imagen.src = configuracion.qr_android_url;
+      enlace.href = configuracion.apk_android_download_url || configuracion.apk_android_url;
+    } else {
+      imagen.removeAttribute('src');
+      enlace.removeAttribute('href');
+    }
+  }
+
+  async function cargarConfiguracionAndroid() {
+    if (!puedeGestionarConfiguracion) return;
+
+    document.getElementById('seccion-descarga-android').style.display = 'block';
+    const resultado = await Api.get('/public/configuracion');
+    if (!resultado.ok) {
+      showToast(resultado.message, 'error');
+      return;
+    }
+
+    pintarConfiguracionAndroid(resultado.data);
+  }
+
+  document.getElementById('form-configuracion-android').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!puedeGestionarConfiguracion) return;
+
+    const error = document.getElementById('error-apk-android-url');
+    error.hidden = true;
+    error.textContent = '';
+
+    const btn = document.getElementById('btn-guardar-configuracion-android');
+    const url = document.getElementById('apk-android-url').value.trim();
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-rounded">progress_activity</span> Guardando...';
+
+    const resultado = await Api.put('/configuracion-sistema', {
+      apk_android_url: url || null,
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-rounded">save</span> Guardar enlace';
+
+    if (!resultado.ok) {
+      if (resultado.errors?.apk_android_url) {
+        error.hidden = false;
+        error.textContent = resultado.errors.apk_android_url[0];
+      }
+      showToast(resultado.message, 'error');
+      return;
+    }
+
+    pintarConfiguracionAndroid(resultado.data);
+    showToast(url ? 'Enlace Android y código QR actualizados.' : 'Enlace Android retirado del login.');
+  });
 
   function cargarCuenta() {
     document.getElementById('cuenta-nombre').value = usuarioActual?.name ?? '';
@@ -299,6 +421,7 @@
   }
 
   cargarCuenta();
+  cargarConfiguracionAndroid();
   cargarEspecialidades();
   cargarPreferencias();
 </script>

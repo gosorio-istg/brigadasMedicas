@@ -146,28 +146,33 @@
     const brigadasProgramadas = brigadas.filter(b => b.estado === 'programada').length;
 
     const tarjetas = [
-      { valor: totalPacientes, etiqueta: 'Pacientes registrados' },
-      { valor: brigadasActivas, etiqueta: 'Campañas en curso' },
-      { valor: brigadasProgramadas, etiqueta: 'Campañas programadas' },
+      { valor: totalPacientes, etiqueta: 'Pacientes registrados', icono: 'personal_injury', tono: 'primary' },
+      { valor: brigadasActivas, etiqueta: 'Campañas en curso', icono: 'medical_services', tono: 'success' },
+      { valor: brigadasProgramadas, etiqueta: 'Campañas programadas', icono: 'event_upcoming', tono: 'info' },
     ];
 
     if (reporteRes) {
       const r = reporteRes.ok ? reporteRes.data : null;
-      tarjetas.push({ valor: r ? r.total_atendidos : '—', etiqueta: 'Total atendidos' });
+      tarjetas.push({ valor: r ? r.total_atendidos : '—', etiqueta: 'Total atendidos', icono: 'health_and_safety', tono: 'success' });
       const tasa = r && r.total_turnos > 0 ? `${Math.round((r.total_atendidos / r.total_turnos) * 100)}%` : '—';
-      tarjetas.push({ valor: tasa, etiqueta: 'Tasa de atención' });
+      tarjetas.push({ valor: tasa, etiqueta: 'Tasa de atención', icono: 'monitoring', tono: 'primary' });
       const espera = r && r.tiempo_promedio_espera_minutos !== null ? `${r.tiempo_promedio_espera_minutos} min` : '—';
-      tarjetas.push({ valor: espera, etiqueta: 'Espera promedio' });
+      tarjetas.push({ valor: espera, etiqueta: 'Espera promedio', icono: 'avg_time', tono: 'warning' });
     }
     if (medicosRes) {
       const medicosDisponibles = medicosRes.ok ? medicosRes.data.filter(m => m.disponible).length : '—';
-      tarjetas.push({ valor: medicosDisponibles, etiqueta: 'Médicos disponibles' });
+      tarjetas.push({ valor: medicosDisponibles, etiqueta: 'Médicos disponibles', icono: 'stethoscope', tono: 'info' });
     }
 
     document.getElementById('stat-grid').innerHTML = tarjetas.map(t => `
       <div class="stat-card">
-        <div class="stat-card-value">${t.valor}</div>
-        <div class="stat-card-label">${t.etiqueta}</div>
+        <div class="stat-card-icon stat-card-icon--${t.tono}">
+          <span class="material-symbols-rounded">${t.icono}</span>
+        </div>
+        <div class="stat-card-copy">
+          <div class="stat-card-value">${t.valor}</div>
+          <div class="stat-card-label">${t.etiqueta}</div>
+        </div>
       </div>`).join('');
   }
 

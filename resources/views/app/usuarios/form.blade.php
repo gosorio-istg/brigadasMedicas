@@ -3,15 +3,21 @@
 @section('titulo', isset($id) ? 'Editar usuario' : 'Nuevo usuario')
 
 @section('content')
-  <header class="page-header">
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">person_add</span></span>
+      <div>
     <a href="{{ route('usuarios.index') }}" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-sm)">
       <span class="material-symbols-rounded">arrow_back</span> Volver
     </a>
     <h1>{{ isset($id) ? 'Editar usuario' : 'Nuevo usuario' }}</h1>
-    <p class="page-subtitle">Cuenta de acceso al sistema</p>
+    <p class="page-subtitle">Configura la identidad, credenciales y responsabilidades de acceso.</p>
+      </div>
+    </div>
   </header>
 
-  <div class="card" style="max-width:560px">
+  <div class="form-workspace">
+  <div class="form-panel">
     <form id="form-usuario" novalidate>
       <div class="grid-2">
         <div class="form-group">
@@ -54,11 +60,21 @@
           Cuenta activa
         </label>
       </div>
-      <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+      <div class="form-actions">
         <a href="{{ route('usuarios.index') }}" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary" id="btn-guardar">{{ isset($id) ? 'Guardar cambios' : 'Crear usuario' }}</button>
       </div>
     </form>
+  </div>
+  <aside class="form-aside">
+    <h3>Asigna solo el acceso necesario</h3>
+    <p>Los roles determinan qué módulos y acciones puede utilizar cada persona.</p>
+    <div class="form-aside-list">
+      <div class="form-aside-item"><span class="material-symbols-rounded">badge</span><span>Comprueba cédula y correo antes de guardar.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">admin_panel_settings</span><span>Selecciona el rol según sus tareas reales.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">toggle_on</span><span>Desactivar conserva el historial sin permitir el ingreso.</span></div>
+    </div>
+  </aside>
   </div>
 @endsection
 

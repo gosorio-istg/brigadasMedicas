@@ -3,15 +3,21 @@
 @section('titulo', 'Nueva campaña')
 
 @section('content')
-  <header class="page-header">
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">add_circle</span></span>
+      <div>
     <a href="{{ route('brigadas.index') }}" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-sm)">
       <span class="material-symbols-rounded">arrow_back</span> Volver
     </a>
     <h1>Nueva campaña</h1>
-    <p class="page-subtitle">Programa una nueva campaña médica comunitaria</p>
+    <p class="page-subtitle">Define la jornada, su ubicación y la capacidad disponible por especialidad.</p>
+      </div>
+    </div>
   </header>
 
-  <div class="card" style="max-width:640px">
+  <div class="form-workspace">
+  <div class="form-panel">
     <form id="form-brigada" novalidate>
       <div class="form-group">
         <label class="form-label" for="nombre">Nombre de la campaña</label>
@@ -40,11 +46,21 @@
         <div id="especialidades-cupos" style="margin-top:var(--space-sm);display:flex;flex-direction:column;gap:8px"></div>
         <span class="form-error-msg" id="error-especialidades" hidden>Selecciona al menos una especialidad y define sus cupos.</span>
       </div>
-      <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+      <div class="form-actions">
         <a href="{{ route('brigadas.index') }}" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary" id="btn-crear">Crear campaña</button>
       </div>
     </form>
+  </div>
+  <aside class="form-aside">
+    <h3>Antes de crear la campaña</h3>
+    <p>Una configuración completa evita ajustes de última hora y ayuda a organizar correctamente al equipo.</p>
+    <div class="form-aside-list">
+      <div class="form-aside-item"><span class="material-symbols-rounded">check_circle</span><span>Usa un nombre reconocible para la comunidad.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">check_circle</span><span>Confirma fecha y referencia de ubicación.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">check_circle</span><span>Asigna cupos realistas para cada especialidad.</span></div>
+    </div>
+  </aside>
   </div>
 @endsection
 

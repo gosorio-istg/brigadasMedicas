@@ -3,21 +3,31 @@
 @section('titulo', 'Pacientes')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Pacientes</h1>
-      <p class="page-subtitle">Cola de turnos y seguimiento de pacientes atendidos</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon module-hero-icon--green"><span class="material-symbols-rounded">personal_injury</span></span>
+      <div>
+        <span class="module-eyebrow">Atención en jornada</span>
+        <h1>Pacientes y turnos</h1>
+        <p class="page-subtitle">Registra la llegada, controla la cola y consulta el historial clínico desde un solo lugar.</p>
+      </div>
     </div>
+    <button type="button" class="btn btn-primary module-hero-actions" data-modal-open="modal-nuevo-turno"><span class="material-symbols-rounded">add</span> Registrar turno</button>
   </header>
 
-  <div class="grid-2" style="margin-bottom:var(--space-md)">
+  <div class="workflow-strip" aria-label="Flujo de atención">
+    <div class="workflow-step"><span class="workflow-step-number">1</span><div><strong>Identifica</strong><small>Busca al paciente antes de crearlo.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">2</span><div><strong>Asigna turno</strong><small>Selecciona campaña y especialidad.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">3</span><div><strong>Actualiza</strong><small>Registra atención, ausencia o cancelación.</small></div></div>
+  </div>
+
+  <div class="module-toolbar">
     <div class="search-input-wrap">
       <span class="material-symbols-rounded">search</span>
-      <input type="search" class="form-control" placeholder="Buscar por cédula o nombre en esta lista..." aria-label="Buscar pacientes" id="search-pacientes">
+      <input type="search" class="form-control" placeholder="Buscar por paciente, cédula o número de turno..." aria-label="Buscar pacientes" id="search-pacientes">
     </div>
-    <select class="form-control" id="filtro-brigada" aria-label="Filtrar por campaña">
-      <option value="">Todas las campañas</option>
-    </select>
+    <div class="form-group" style="min-width:min(100%,280px)"><label class="module-toolbar-label" for="filtro-brigada">Campaña</label><select class="form-control" id="filtro-brigada" aria-label="Filtrar por campaña"><option value="">Todas las campañas</option></select></div>
+    <button type="button" class="btn btn-primary module-toolbar-mobile-action" data-modal-open="modal-nuevo-turno"><span class="material-symbols-rounded">add</span> Nuevo turno</button>
   </div>
 
   <nav class="filter-bar" aria-label="Filtrar por estado">
@@ -29,7 +39,9 @@
     <button class="filter-chip" data-estado="no_asistio">No asistió</button>
   </nav>
 
-  <div class="table-responsive">
+  <section class="data-panel">
+    <div class="data-panel-header"><div><div class="data-panel-title">Cola y seguimiento</div><div class="data-panel-caption" id="resumen-turnos">Selecciona un estado o campaña para concentrar la atención.</div></div></div>
+    <div class="table-responsive">
     <table class="data-table" id="tabla-turnos">
       <thead>
         <tr>
@@ -45,15 +57,16 @@
         <tr><td colspan="6">Cargando...</td></tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="pagination" id="paginacion">
+    <div class="pagination" id="paginacion">
     <span id="paginacion-texto"></span>
     <div class="pagination-btns">
       <button class="btn btn-outline btn-sm" id="btn-anterior" disabled>Anterior</button>
       <button class="btn btn-outline btn-sm" id="btn-siguiente" disabled>Siguiente</button>
     </div>
-  </div>
+    </div>
+  </section>
 
   <a href="#" class="bottom-nav-fab" aria-label="Registrar turno" data-modal-open="modal-nuevo-turno">
     <span class="material-symbols-rounded">add</span>
@@ -275,6 +288,7 @@
     }
 
     turnosCache = resultado.data;
+    document.getElementById('resumen-turnos').textContent = `${resultado.meta?.total ?? resultado.data.length} turnos encontrados con los filtros actuales`;
     pintarTurnos();
     pintarPaginacion(resultado.meta);
   }

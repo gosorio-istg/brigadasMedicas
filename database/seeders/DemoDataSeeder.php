@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Brigada;
 use App\Models\Comunidad;
+use App\Models\ConfiguracionSistema;
 use App\Models\Especialidad;
 use App\Models\Medico;
 use App\Models\Noticia;
@@ -34,6 +35,13 @@ class DemoDataSeeder extends Seeder
         $this->sembrarComunidades();
         $this->sembrarNoticias($usuarios);
         $this->sembrarSolicitudesBrigada($brigadas);
+        // La demo ofrece la APK incluida en public/images mediante una ruta estable.
+        // El Administrador puede reemplazarla después por una URL HTTPS externa.
+        ConfiguracionSistema::query()->updateOrCreate([], [
+            // La ruta se resuelve con el dominio actual, por eso funciona igual en
+            // Laragon, una IP de red local y el servidor de producción.
+            'apk_android_url' => ConfiguracionSistema::RUTA_APK_ANDROID_LOCAL,
+        ]);
     }
 
     // Busca por email O cédula antes de crear: firstOrCreate() solo compara por el atributo
@@ -304,7 +312,7 @@ class DemoDataSeeder extends Seeder
         foreach ($datos as $dato) {
             $brigada = $brigadas[$dato['brigada']];
             $especialidad = $especialidades[$dato['especialidad']];
-            $clave = $brigada->id . '-' . $especialidad->id;
+            $clave = $brigada->id.'-'.$especialidad->id;
             $consecutivos[$clave] = ($consecutivos[$clave] ?? 0) + 1;
 
             $horaRegistro = Carbon::now()->subHours($dato['horas_desde_registro']);
@@ -481,6 +489,6 @@ class DemoDataSeeder extends Seeder
             ? mb_substr(collect($palabras)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode(''), 0, 3)
             : mb_strtoupper(mb_substr($palabras[0], 0, 3));
 
-        return $prefijo . '-' . str_pad((string) $consecutivo, 3, '0', STR_PAD_LEFT);
+        return $prefijo.'-'.str_pad((string) $consecutivo, 3, '0', STR_PAD_LEFT);
     }
 }

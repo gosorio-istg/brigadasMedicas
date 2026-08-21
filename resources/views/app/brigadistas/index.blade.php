@@ -3,29 +3,39 @@
 @section('titulo', 'Brigadistas')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Brigadistas</h1>
-      <p class="page-subtitle">Equipo asignado a cada campaña y control de asistencia</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon module-hero-icon--green"><span class="material-symbols-rounded">volunteer_activism</span></span>
+      <div>
+        <span class="module-eyebrow">Equipo operativo</span>
+        <h1>Brigadistas</h1>
+        <p class="page-subtitle">Organiza el equipo de cada campaña, define responsabilidades y registra la asistencia.</p>
+      </div>
     </div>
   </header>
 
-  <div class="form-group" style="max-width:420px;margin-bottom:var(--space-md)">
-    <label class="form-label" for="selector-brigada">Campaña</label>
-    <select id="selector-brigada" class="form-control">
-      <option value="">Selecciona una campaña...</option>
-    </select>
+  <div class="workflow-strip" aria-label="Flujo de asignación de equipo">
+    <div class="workflow-step"><span class="workflow-step-number">1</span><div><strong>Elige campaña</strong><small>Ubica la jornada que vas a preparar.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">2</span><div><strong>Asigna funciones</strong><small>Agrega brigadistas con su rol operativo.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">3</span><div><strong>Confirma asistencia</strong><small>Marca el resultado al finalizar.</small></div></div>
+  </div>
+
+  <div class="module-toolbar">
+    <div class="form-group" style="width:min(100%,520px)">
+      <label class="module-toolbar-label" for="selector-brigada">Campaña que deseas gestionar</label>
+      <select id="selector-brigada" class="form-control"><option value="">Selecciona una campaña...</option></select>
+    </div>
   </div>
 
   <div id="panel-equipo" style="display:none">
-    <div class="flex-between" style="margin-bottom:var(--space-sm)">
-      <h2 style="font-size:var(--font-size-body)">Equipo asignado</h2>
+    <div class="data-panel">
+      <div class="data-panel-header">
+        <div><div class="data-panel-title">Equipo asignado</div><div class="data-panel-caption">Las acciones de asistencia se aplican únicamente a la campaña seleccionada.</div></div>
       <button type="button" class="btn btn-primary btn-sm" id="btn-agregar-brigadista">
         <span class="material-symbols-rounded">person_add</span> Agregar brigadista
       </button>
-    </div>
-
-    <div class="table-responsive">
+      </div>
+      <div class="table-responsive">
       <table class="data-table" id="tabla-brigadistas">
         <thead>
           <tr>
@@ -40,6 +50,7 @@
           <tr><td colspan="5">Cargando...</td></tr>
         </tbody>
       </table>
+      </div>
     </div>
   </div>
 

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Brigada;
+use App\Models\ConfiguracionSistema;
 use App\Models\Especialidad;
 use App\Models\Medico;
 use App\Models\User;
@@ -36,6 +37,57 @@ class ModuleApiTest extends TestCase
             ->assertOk()->assertJsonPath('data.sector', 'Sector sur');
         $this->deleteJson("/api/v1/comunidades/{$created['id']}")->assertOk();
         $this->assertDatabaseMissing('comunidades', ['id' => $created['id']]);
+    }
+
+    public function test_android_download_configuration_is_public_but_only_an_admin_can_update_it(): void
+    {
+        ConfiguracionSistema::query()->delete();
+
+        // Una instalación nueva publica por defecto la APK incluida en la plataforma.
+        $this->getJson('/api/v1/public/configuracion')
+            ->assertOk()
+            ->assertJsonPath('data.apk_android_url', ConfiguracionSistema::RUTA_APK_ANDROID_LOCAL)
+            ->assertJsonPath('data.apk_android_download_url', url(ConfiguracionSistema::RUTA_APK_ANDROID_LOCAL));
+
+        $sinPermiso = User::factory()->create(['activo' => true]);
+        Sanctum::actingAs($sinPermiso);
+        $this->putJson('/api/v1/configuracion-sistema', [
+            'apk_android_url' => 'https://descargas.example.com/brigadasalud.apk',
+        ])->assertForbidden();
+
+        $administrador = User::factory()->create(['activo' => true]);
+        $administrador->givePermissionTo(Permission::firstOrCreate([
+            'name' => 'configuracion.gestionar',
+            'guard_name' => 'web',
+        ]));
+        Sanctum::actingAs($administrador);
+
+        $this->putJson('/api/v1/configuracion-sistema', [
+            'apk_android_url' => 'http://descargas.example.com/brigadasalud.apk',
+        ])->assertUnprocessable();
+
+        $this->putJson('/api/v1/configuracion-sistema', [
+            'apk_android_url' => ConfiguracionSistema::RUTA_APK_ANDROID_LOCAL,
+        ])->assertOk()
+            ->assertJsonPath('data.apk_android_url', ConfiguracionSistema::RUTA_APK_ANDROID_LOCAL);
+
+        $this->putJson('/api/v1/configuracion-sistema', [
+            'apk_android_url' => 'https://descargas.example.com/brigadasalud.apk',
+        ])->assertOk()
+            ->assertJsonPath('data.apk_android_url', 'https://descargas.example.com/brigadasalud.apk');
+
+        $publica = $this->getJson('/api/v1/public/configuracion')
+            ->assertOk()
+            ->assertJsonPath('data.apk_android_url', 'https://descargas.example.com/brigadasalud.apk');
+        $this->assertNotEmpty($publica->json('data.qr_android_url'));
+
+        $qr = $this->get('/api/v1/public/configuracion/android/qr')->assertOk();
+        $qr->assertHeader('Content-Type', 'image/svg+xml; charset=UTF-8');
+        $this->assertStringContainsString('<svg', $qr->getContent());
+
+        $this->get(route('android.apk.download', absolute: false))
+            ->assertOk()
+            ->assertDownload('BrigadasMedicasV3.apk');
     }
 
     public function test_user_can_update_only_their_supported_profile_fields(): void

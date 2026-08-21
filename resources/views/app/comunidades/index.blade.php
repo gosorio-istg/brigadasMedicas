@@ -3,22 +3,31 @@
 @section('titulo', 'Comunidades')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Comunidades</h1>
-      <p class="page-subtitle">Catálogo de sectores y comunidades atendidas</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon module-hero-icon--green"><span class="material-symbols-rounded">location_city</span></span>
+      <div>
+        <span class="module-eyebrow">Cobertura territorial</span>
+        <h1>Comunidades</h1>
+        <p class="page-subtitle">Mantén un catálogo claro de sectores, referencias y zonas donde se realizan jornadas.</p>
+      </div>
     </div>
-    <button type="button" class="btn btn-primary" id="btn-nueva-comunidad">
+    <button type="button" class="btn btn-primary module-hero-actions" id="btn-nueva-comunidad-hero">
       <span class="material-symbols-rounded">add</span> Nueva comunidad
     </button>
   </header>
 
-  <div class="search-input-wrap" style="margin-bottom:var(--space-md)">
-    <span class="material-symbols-rounded">search</span>
-    <input type="search" class="form-control" placeholder="Buscar en esta página por nombre o sector..." aria-label="Buscar comunidades" id="search-comunidades">
+  <div class="module-toolbar">
+    <div class="search-input-wrap">
+      <span class="material-symbols-rounded">search</span>
+      <input type="search" class="form-control" placeholder="Buscar por comunidad, sector o referencia..." aria-label="Buscar comunidades" id="search-comunidades">
+    </div>
+    <button type="button" class="btn btn-primary module-toolbar-mobile-action" id="btn-nueva-comunidad"><span class="material-symbols-rounded">add_location_alt</span> Agregar comunidad</button>
   </div>
 
-  <div class="table-responsive">
+  <section class="data-panel">
+    <div class="data-panel-header"><div><div class="data-panel-title">Directorio territorial</div><div class="data-panel-caption" id="resumen-comunidades">Cargando comunidades...</div></div></div>
+    <div class="table-responsive">
     <table class="data-table" id="tabla-comunidades">
       <thead>
         <tr>
@@ -32,15 +41,16 @@
         <tr><td colspan="4">Cargando...</td></tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="pagination" id="paginacion">
+    <div class="pagination" id="paginacion">
     <span id="paginacion-texto"></span>
     <div class="pagination-btns">
       <button class="btn btn-outline btn-sm" id="btn-anterior" disabled>Anterior</button>
       <button class="btn btn-outline btn-sm" id="btn-siguiente" disabled>Siguiente</button>
     </div>
-  </div>
+    </div>
+  </section>
 @endsection
 
 @section('modals')
@@ -106,15 +116,19 @@
       return;
     }
 
+    const total = resultado.meta?.total ?? resultado.data.length;
+    const sectores = new Set(resultado.data.map(c => c.sector).filter(Boolean)).size;
+    document.getElementById('resumen-comunidades').textContent = `${total} comunidades registradas · ${sectores} sectores visibles en esta página`;
+
     cuerpo.innerHTML = resultado.data.map(c => `
       <tr>
         <td data-label="Nombre"><strong>${c.nombre}</strong></td>
         <td data-label="Sector">${c.sector}</td>
         <td data-label="Referencia">${c.referencia_ubicacion ?? '—'}</td>
         <td data-label="Acciones">
-          <div style="display:flex;gap:8px">
-            <button type="button" class="btn btn-outline btn-sm" data-editar='${JSON.stringify(c)}'>Editar</button>
-            <button type="button" class="btn btn-outline btn-sm" data-eliminar-id="${c.id}" data-eliminar-nombre="${c.nombre}">Eliminar</button>
+          <div class="table-actions">
+            <button type="button" class="btn btn-outline btn-sm" data-editar='${JSON.stringify(c)}'><span class="material-symbols-rounded">edit_location_alt</span> Editar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-eliminar-id="${c.id}" data-eliminar-nombre="${c.nombre}" aria-label="Eliminar ${c.nombre}"><span class="material-symbols-rounded">delete</span></button>
           </div>
         </td>
       </tr>`).join('');
@@ -154,6 +168,10 @@
     limpiarFormulario();
     document.getElementById('modal-comunidad-title').textContent = 'Nueva comunidad';
     openModal('modal-comunidad');
+  });
+
+  document.getElementById('btn-nueva-comunidad-hero').addEventListener('click', () => {
+    document.getElementById('btn-nueva-comunidad').click();
   });
 
   function abrirModalEditar(comunidad) {

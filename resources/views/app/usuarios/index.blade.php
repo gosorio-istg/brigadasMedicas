@@ -3,12 +3,16 @@
 @section('titulo', 'Usuarios')
 
 @section('content')
-  <header class="page-header flex-between">
-    <div>
-      <h1>Usuarios</h1>
-      <p class="page-subtitle">Cuentas del sistema, roles y permisos</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">manage_accounts</span></span>
+      <div>
+        <span class="module-eyebrow">Acceso y seguridad</span>
+        <h1>Usuarios</h1>
+        <p class="page-subtitle">Gestiona cuentas, estados de acceso y permisos según la responsabilidad de cada persona.</p>
+      </div>
     </div>
-    <a href="{{ route('usuarios.crear') }}" class="btn btn-primary" id="btn-nuevo-usuario">
+    <a href="{{ route('usuarios.crear') }}" class="btn btn-primary module-hero-actions" id="btn-nuevo-usuario-hero">
       <span class="material-symbols-rounded">person_add</span> Nuevo usuario
     </a>
   </header>
@@ -19,12 +23,14 @@
   </nav>
 
   <section id="panel-usuarios">
-    <div class="search-input-wrap" style="margin-bottom:var(--space-md)">
-      <span class="material-symbols-rounded">search</span>
-      <input type="search" class="form-control" placeholder="Buscar en esta página por nombre, cédula o correo..." aria-label="Buscar usuarios" id="search-usuarios">
+    <div class="module-toolbar">
+      <div class="search-input-wrap"><span class="material-symbols-rounded">search</span><input type="search" class="form-control" placeholder="Buscar por nombre, cédula, correo o rol..." aria-label="Buscar usuarios" id="search-usuarios"></div>
+      <a href="{{ route('usuarios.crear') }}" class="btn btn-primary module-toolbar-mobile-action" id="btn-nuevo-usuario"><span class="material-symbols-rounded">person_add</span> Crear usuario</a>
     </div>
 
-    <div class="table-responsive">
+    <div class="data-panel">
+      <div class="data-panel-header"><div><div class="data-panel-title">Directorio de accesos</div><div class="data-panel-caption">Desactiva temporalmente una cuenta sin eliminar su historial.</div></div></div>
+      <div class="table-responsive">
       <table class="data-table" id="tabla-usuarios">
         <thead>
           <tr>
@@ -40,13 +46,14 @@
           <tr><td colspan="6">Cargando...</td></tr>
         </tbody>
       </table>
-    </div>
+      </div>
 
-    <div class="pagination" id="paginacion-usuarios">
+      <div class="pagination" id="paginacion-usuarios">
       <span id="paginacion-usuarios-texto"></span>
       <div class="pagination-btns">
         <button class="btn btn-outline btn-sm" id="btn-usuarios-anterior" disabled>Anterior</button>
         <button class="btn btn-outline btn-sm" id="btn-usuarios-siguiente" disabled>Siguiente</button>
+      </div>
       </div>
     </div>
   </section>
@@ -137,7 +144,10 @@
       const tab = chip.dataset.tab;
       document.getElementById('panel-usuarios').style.display = tab === 'usuarios' ? 'block' : 'none';
       document.getElementById('panel-roles').style.display = tab === 'roles' ? 'block' : 'none';
-      document.getElementById('btn-nuevo-usuario').style.display = tab === 'usuarios' ? 'inline-flex' : 'none';
+      // Al volver a Usuarios se retira el estilo inline para que CSS decida cuál
+      // acción mostrar: cabecera en escritorio y barra de trabajo en móvil.
+      document.getElementById('btn-nuevo-usuario').style.display = tab === 'usuarios' ? '' : 'none';
+      document.getElementById('btn-nuevo-usuario-hero').style.display = tab === 'usuarios' ? '' : 'none';
       if (tab === 'roles' && !rolesCargados) cargarRoles();
     });
   });

@@ -3,15 +3,21 @@
 @section('titulo', isset($id) ? 'Editar médico' : 'Nuevo médico')
 
 @section('content')
-  <header class="page-header">
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">medical_services</span></span>
+      <div>
     <a href="{{ route('medicos.index') }}" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-sm)">
       <span class="material-symbols-rounded">arrow_back</span> Volver
     </a>
     <h1 id="titulo-form">{{ isset($id) ? 'Editar médico' : 'Nuevo médico' }}</h1>
-    <p class="page-subtitle">Datos del profesional de salud</p>
+    <p class="page-subtitle">Completa los datos profesionales y el acceso que utilizará en la aplicación móvil.</p>
+      </div>
+    </div>
   </header>
 
-  <div class="card" style="max-width:560px">
+  <div class="form-workspace">
+  <div class="form-panel">
     <form id="form-medico" novalidate>
       <div class="form-group">
         <label class="form-label" for="nombres">Nombres completos</label>
@@ -66,11 +72,21 @@
           <span class="form-error-msg" id="error-password" hidden></span>
         </div>
       </div>
-      <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+      <div class="form-actions">
         <a href="{{ route('medicos.index') }}" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary" id="btn-guardar">{{ isset($id) ? 'Guardar cambios' : 'Registrar médico' }}</button>
       </div>
     </form>
+  </div>
+  <aside class="form-aside">
+    <h3>Registro completo en un paso</h3>
+    <p>Al registrar un médico nuevo también se crea su cuenta para ingresar a la aplicación.</p>
+    <div class="form-aside-list">
+      <div class="form-aside-item"><span class="material-symbols-rounded">verified</span><span>Verifica que la credencial CMP sea correcta.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">alternate_email</span><span>El correo será el usuario de acceso.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">key</span><span>Entrega la contraseña temporal de manera segura.</span></div>
+    </div>
+  </aside>
   </div>
 @endsection
 

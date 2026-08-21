@@ -197,6 +197,7 @@ return [
         'notas_coordinador' => 'notas del coordinador',
         'notificaciones_email' => 'notificaciones por correo',
         'notificaciones_push' => 'notificaciones push',
+        'apk_android_url' => 'URL de descarga de la aplicación Android',
     ],
 
 ];

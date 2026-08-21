@@ -3,10 +3,22 @@
 @section('titulo', 'Mis campañas')
 
 @section('content')
-  <header class="page-header">
-    <h1>Mis campañas</h1>
-    <p class="page-subtitle">Consulta las jornadas disponibles y administra tu confirmación de asistencia.</p>
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon module-hero-icon--green"><span class="material-symbols-rounded">event_available</span></span>
+      <div>
+        <span class="module-eyebrow">Mi participación</span>
+        <h1>Mis campañas</h1>
+        <p class="page-subtitle">Consulta dónde se necesita tu apoyo y mantén actualizada tu confirmación de asistencia.</p>
+      </div>
+    </div>
   </header>
+
+  <div class="workflow-strip" aria-label="Flujo de confirmación">
+    <div class="workflow-step"><span class="workflow-step-number">1</span><div><strong>Revisa la jornada</strong><small>Confirma fecha, ubicación y especialidades.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">2</span><div><strong>Responde</strong><small>Indica si asistirás, tal vez o no asistirás.</small></div></div>
+    <div class="workflow-step"><span class="workflow-step-number">3</span><div><strong>Mantén informado</strong><small>Puedes cambiar tu respuesta cuando lo necesites.</small></div></div>
+  </div>
 
   <div id="attendance-feedback" class="card" style="display:none;margin-bottom:20px;border-left:4px solid var(--secondary)"></div>
 

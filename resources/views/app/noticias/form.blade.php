@@ -3,15 +3,21 @@
 @section('titulo', isset($id) ? 'Editar noticia' : 'Nueva noticia')
 
 @section('content')
-  <header class="page-header">
+  <header class="module-hero">
+    <div class="module-hero-copy">
+      <span class="module-hero-icon"><span class="material-symbols-rounded">edit_note</span></span>
+      <div>
     <a href="{{ route('noticias.index') }}" class="btn btn-ghost btn-sm" style="margin-bottom:var(--space-sm)">
       <span class="material-symbols-rounded">arrow_back</span> Volver
     </a>
     <h1>{{ isset($id) ? 'Editar noticia' : 'Nueva noticia' }}</h1>
-    <p class="page-subtitle">Comunicado para la comunidad</p>
+    <p class="page-subtitle">Redacta un comunicado claro y decide si se publica ahora o queda como borrador.</p>
+      </div>
+    </div>
   </header>
 
-  <div class="card" style="max-width:680px">
+  <div class="form-workspace">
+  <div class="form-panel">
     <form id="form-noticia" novalidate>
       <div class="form-group">
         <label class="form-label" for="titulo">Título</label>
@@ -44,11 +50,21 @@
           Publicar de inmediato
         </label>
       </div>
-      <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+      <div class="form-actions">
         <a href="{{ route('noticias.index') }}" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary" id="btn-guardar">{{ isset($id) ? 'Guardar cambios' : 'Publicar noticia' }}</button>
       </div>
     </form>
+  </div>
+  <aside class="form-aside">
+    <h3>Un mensaje fácil de entender</h3>
+    <p>La comunidad debe reconocer rápidamente qué ocurrirá, dónde y cuándo.</p>
+    <div class="form-aside-list">
+      <div class="form-aside-item"><span class="material-symbols-rounded">title</span><span>Usa un título corto y específico.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">image</span><span>La imagen es opcional, pero debe provenir de una URL segura.</span></div>
+      <div class="form-aside-item"><span class="material-symbols-rounded">draft</span><span>Desmarca “Publicar” si todavía necesitas revisar el texto.</span></div>
+    </div>
+  </aside>
   </div>
 @endsection
 

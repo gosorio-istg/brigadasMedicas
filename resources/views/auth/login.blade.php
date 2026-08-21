@@ -8,20 +8,25 @@
       <img src="{{ asset('images/logo_brigada.jpeg') }}" alt="Logo BrigadaMedica" class="auth-brand-logo">
       <span class="auth-brand-name">BrigadaMedica</span>
     </div>
-    <h1 class="auth-title">Iniciar sesión</h1>
-    <p class="auth-subtitle">Panel del Coordinador — Campañas médicas comunitarias</p>
+    <span class="auth-welcome-label">Bienvenido de nuevo</span>
+    <h1 class="auth-title">Inicia sesión en tu cuenta</h1>
+    <p class="auth-subtitle">Ingresa tus credenciales para continuar al panel de gestión.</p>
   </header>
 
   <form id="login-form" novalidate>
     <div class="form-group" id="group-login">
       <label class="form-label" for="login">Cédula o correo electrónico</label>
-      <input type="text" id="login" class="form-control" placeholder="0912345678" autocomplete="username" required>
+      <div class="auth-input-wrap">
+        <span class="material-symbols-rounded" aria-hidden="true">person</span>
+        <input type="text" id="login" class="form-control" placeholder="0912345678 o nombre@correo.com" autocomplete="username" required>
+      </div>
       <span class="form-error-msg" id="error-login" hidden></span>
     </div>
 
     <div class="form-group" id="group-pass">
       <label class="form-label" for="password">Contraseña</label>
-      <div class="input-with-icon">
+      <div class="input-with-icon auth-input-wrap">
+        <span class="material-symbols-rounded auth-input-leading" aria-hidden="true">lock</span>
         <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
         <button type="button" class="material-symbols-rounded" data-toggle-password="password" aria-label="Mostrar contraseña">visibility</button>
       </div>
@@ -36,7 +41,10 @@
     </div>
 
     <div class="auth-actions">
-      <button type="submit" class="btn btn-primary btn-block" id="btn-login">Iniciar sesión</button>
+      <button type="submit" class="btn btn-primary btn-block auth-submit" id="btn-login">
+        <span>Iniciar sesión</span>
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+      </button>
       <a href="{{ route('password.request') }}" class="auth-link">¿Olvidaste tu contraseña?</a>
     </div>
   </form>
@@ -64,12 +72,12 @@
 
     const btn = document.getElementById('btn-login');
     btn.disabled = true;
-    btn.textContent = 'Ingresando...';
+    btn.innerHTML = '<span>Verificando acceso...</span><span class="material-symbols-rounded auth-submit-spinner" aria-hidden="true">progress_activity</span>';
 
     const resultado = await Api.login(login, password);
 
     btn.disabled = false;
-    btn.textContent = 'Iniciar sesión';
+    btn.innerHTML = '<span>Iniciar sesión</span><span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>';
 
     if (!resultado.ok) {
       // 422: errores de validación por campo (incluye "credenciales incorrectas" bajo "login").

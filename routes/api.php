@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\BrigadaAsistenciaController;
 use App\Http\Controllers\Api\BrigadaController;
 use App\Http\Controllers\Api\ClinicalRecordController;
 use App\Http\Controllers\Api\ComunidadController;
+use App\Http\Controllers\Api\ConfiguracionSistemaController;
 use App\Http\Controllers\Api\DevToolsController;
 use App\Http\Controllers\Api\EspecialidadController;
 use App\Http\Controllers\Api\MedicoController;
@@ -34,6 +35,10 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/firebase', [AuthController::class, 'firebase'])->middleware('throttle:10,1');
     Route::get('/public/brigadas', [PublicContentController::class, 'brigadas']);
     Route::get('/public/noticias', [PublicContentController::class, 'noticias']);
+    // El login consulta la URL pública y carga un SVG generado por el propio servidor.
+    Route::get('/public/configuracion', [ConfiguracionSistemaController::class, 'showPublic']);
+    Route::get('/public/configuracion/android/qr', [ConfiguracionSistemaController::class, 'qrAndroid'])
+        ->name('public.configuracion.android-qr');
 
     // Público: cualquier ciudadano puede pedir una brigada sin necesidad de una cuenta.
     Route::post('/solicitudes-brigada', [SolicitudBrigadaController::class, 'store']);
@@ -64,6 +69,11 @@ Route::prefix('v1')->group(function () {
         // Preferencias propias del usuario autenticado: no requiere permiso especial.
         Route::get('/preferencias', [PreferenciaController::class, 'show']);
         Route::put('/preferencias', [PreferenciaController::class, 'update']);
+
+        // Configuración global: distinta de las preferencias personales y exclusiva
+        // del Administrador mediante el permiso ya existente configuracion.gestionar.
+        Route::put('/configuracion-sistema', [ConfiguracionSistemaController::class, 'update'])
+            ->middleware('permission:configuracion.gestionar');
 
         Route::middleware('permission:usuarios.ver')->group(function () {
             Route::get('/users', [UserController::class, 'index']);

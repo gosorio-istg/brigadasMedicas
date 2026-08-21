@@ -77,6 +77,8 @@ Cubre la brecha detectada en el cuestionario del documento académico: la comuni
 ### Configuración / Preferencias de notificación
 Cierra la sección 6.7: gestión de especialidades y datos de cuenta ya existían; lo único nuevo es `GET/PUT /preferencias` (tabla `user_preferencias`, modelo `Preferencia`), autoservicio del usuario autenticado (no requiere permiso especial, cada quien administra las suyas). `PreferenciaController::preferenciaDelUsuario()` usa `firstOrCreate` con los valores por defecto explícitos — **ojo con el bug relacionado en sección 10 (bug #4)**.
 
+Además existe una **configuración global de descarga Android**, separada de las preferencias personales. La tabla singleton `configuracion_sistema` guarda `apk_android_url`; únicamente un usuario con `configuracion.gestionar` puede modificarla mediante `PUT /api/v1/configuracion-sistema`. Por defecto contiene la ruta interna `/descargas/brigadas-medicas-android.apk`, que entrega el archivo `public/images/BrigadasMedicasV3.apk` y se convierte automáticamente en una URL completa usando el dominio actual. También admite una URL HTTPS externa. El login consulta `GET /api/v1/public/configuracion` y muestra un QR generado localmente por Laravel en `GET /api/v1/public/configuracion/android/qr`. En escritorio se presenta el QR para escanear y en móvil se prioriza el botón de descarga directa. Si el Administrador guarda el campo vacío, el bloque se oculta. Por el momento solo contempla Android.
+
 ### Permisos ya sembrados
 ```
 usuarios.ver, usuarios.crear, usuarios.editar, usuarios.eliminar,
@@ -93,6 +95,8 @@ Roles: `Administrador` (todos, incluido `configuracion.gestionar`), `Coordinador
 ## 5. Diseño de interfaz (referencia)
 
 Sidebar web: **Dashboard, Brigadas, Pacientes, Médicos, Brigadistas, Comunidades, Reportes, Noticias, Configuración**. Detalle completo de pantallas en `BrigadaSalud_Especificacion_UI_Web.md`.
+
+La interfaz web utiliza ahora un sistema visual común y responsive para todos los módulos: cabecera contextual con icono, guía corta del flujo cuando la tarea tiene varios pasos, barra de búsqueda/filtros, métricas útiles, paneles de datos y formularios con ayuda lateral. En móvil las tablas se transforman en tarjetas, las guías se desplazan horizontalmente y las acciones de guardado permanecen accesibles sobre la navegación inferior. Mantener estos componentes (`module-hero`, `workflow-strip`, `module-toolbar`, `data-panel`, `form-workspace`) al crear nuevas pantallas para conservar la coherencia del producto.
 
 ---
 
@@ -214,6 +218,7 @@ Sin tablas nuevas — son consultas agregadas sobre `Turno`, `Especialidad`, `Pa
 - Gestión de especialidades → ya existía (`EspecialidadController`).
 - Datos de cuenta → ya existía (`GET/PUT` sobre `/me` y `/users/{id}`).
 - Preferencias de notificación → **implementado**: tabla `user_preferencias` (`notificaciones_email`, `notificaciones_push`), `GET/PUT /preferencias`.
+- Descarga de la aplicación Android → **implementada**: URL HTTPS global editable por el Administrador, QR SVG generado dentro del servidor y bloque responsive en el login. No usa un generador QR externo.
 
 **Permiso sembrado**: `configuracion.gestionar` (exclusivo de `Administrador`).
 
@@ -283,4 +288,3 @@ Todo lo anterior se verificó con integración real: migraciones corridas contra
 
 TODO EL CODIGO DEBE SER COMENTADO EN ESPAÑOL PARA 
 QUE CUALQUIER DESARROLLADOR PUEDA ENTENDERLO, AUNQUE NO HAYA PARTICIPADO EN EL PROYECTO.
-
