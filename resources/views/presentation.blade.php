@@ -7,7 +7,7 @@
     <meta name="description" content="Presentación académica de BrigadaSalud">
     <title>BrigadaSalud | Presentación académica</title>
     {{-- La versión fuerza la actualización del diseño cuando producción conserva CSS en caché. --}}
-    <link rel="stylesheet" href="{{ asset('css/presentation.css') }}?v=20260821-4">
+    <link rel="stylesheet" href="{{ asset('css/presentation.css') }}?v=20260821-5">
 </head>
 <body>
     {{-- Los símbolos SVG se reutilizan para mantener una identidad visual consistente y ligera. --}}
@@ -351,11 +351,27 @@
                     <p class="eyebrow eyebrow--light">A quienes guiaron el camino</p>
                     <h3>Gracias por compartir<br>su conocimiento.</h3>
                     <div class="mentor-list">
-                        <span><b>José Luis Haz Valero</b><small>Expresión Oral y Escrita</small></span>
-                        <span><b>Richard Tigrero</b><small>Programación Web</small></span>
-                        <span><b>Carlos Luis Pazmiño Palma</b><small>Programación Móvil</small></span>
-                        <span><b>Ángel Humberto Veloz Rodríguez</b><small>Diseño de Interfaz</small></span>
-                        <span><b>Ivan Amat</b><small>Redes y Telecomunicaciones</small></span>
+                        {{-- Cada materia tiene un símbolo monocromático para reconocerla de inmediato. --}}
+                        <article>
+                            <i class="mentor-icon"><svg><use href="#i-file"/></svg></i>
+                            <span><b>José Luis Haz Valero</b><small>Expresión Oral y Escrita</small></span>
+                        </article>
+                        <article>
+                            <i class="mentor-icon"><svg><use href="#i-api"/></svg></i>
+                            <span><b>Richard Tigrero</b><small>Programación Web</small></span>
+                        </article>
+                        <article>
+                            <i class="mentor-icon"><svg><use href="#i-phone"/></svg></i>
+                            <span><b>Carlos Luis Pazmiño Palma</b><small>Programación Móvil</small></span>
+                        </article>
+                        <article>
+                            <i class="mentor-icon"><svg><use href="#i-monitor"/></svg></i>
+                            <span><b>Ángel Humberto Veloz Rodríguez</b><small>Diseño de Interfaz</small></span>
+                        </article>
+                        <article>
+                            <i class="mentor-icon"><svg><use href="#i-wifi"/></svg></i>
+                            <span><b>Ivan Amat</b><small>Redes y Telecomunicaciones</small></span>
+                        </article>
                     </div>
                 </div>
                 <div class="closing-content">

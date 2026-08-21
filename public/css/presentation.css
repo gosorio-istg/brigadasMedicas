@@ -563,10 +563,13 @@ svg {
 .closing-grid { display: grid; grid-template-columns: .82fr 1.18fr; align-items: center; gap: clamp(40px, 7vw, 120px); text-align: left; }
 .mentor-column h3 { margin: 0 0 32px; color: #fff; font-size: clamp(26px, 2.5vw, 41px); letter-spacing: -.04em; line-height: 1.08; }
 .mentor-list { display: grid; gap: 9px; }
-.mentor-list span { display: block; padding: 10px 14px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 12px; }
+.mentor-list article { display: grid; grid-template-columns: 42px 1fr; align-items: center; gap: 13px; min-width: 0; padding: 10px 14px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 13px; }
+.mentor-icon { display: grid; place-items: center; width: 42px; height: 42px; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 12px; }
+.mentor-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mentor-list span { display: block; min-width: 0; }
 .mentor-list b, .mentor-list small { display: block; }
-.mentor-list b { color: #fff; font-size: clamp(11px, .9vw, 14px); }
-.mentor-list small { margin-top: 3px; color: rgba(255,255,255,.64); font-size: clamp(8px, .7vw, 11px); }
+.mentor-list b { color: #fff; font-size: clamp(15px, 1.15vw, 19px); line-height: 1.15; }
+.mentor-list small { margin-top: 4px; color: rgba(255,255,255,.72); font-size: clamp(10px, .78vw, 13px); font-weight: 600; }
 .closing-content { display: grid; justify-items: center; }
 .closing-content > img { width: clamp(110px, 10vw, 160px); aspect-ratio: 1; margin-bottom: clamp(24px, 3vh, 38px); object-fit: cover; border: 8px solid rgba(255,255,255,.95); border-radius: 50%; box-shadow: 0 24px 50px rgba(1,24,47,.25); }
 .closing-content h2 { color: #fff; font-size: clamp(48px, 6.5vw, 105px); }
@@ -703,7 +706,11 @@ svg {
     .impact-grid small { font-size: 11px; }
     .mentor-column h3 { margin-bottom: 18px; font-size: 25px; }
     .mentor-list { grid-template-columns: 1fr; gap: 6px; }
-    .mentor-list span { padding: 7px 10px; }
+    .mentor-list article { grid-template-columns: 36px 1fr; gap: 9px; padding: 7px 10px; }
+    .mentor-icon { width: 36px; height: 36px; border-radius: 10px; }
+    .mentor-icon svg { width: 20px; height: 20px; }
+    .mentor-list b { font-size: 14px; }
+    .mentor-list small { font-size: 9px; }
     .closing-content h2 { font-size: 43px; }
     .team-frame { min-height: 0; border-radius: 14px; }
     .presentation-controls { left: 50%; right: auto; transform: translateX(-50%); }
